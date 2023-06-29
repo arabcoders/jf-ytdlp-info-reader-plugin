@@ -81,11 +81,12 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         public void YTDLJsonToMovieTest()
         {
             var result = Utils.YTDLJsonToMovie(GetYouTubeVideoData());
+
             Assert.True(result.HasMetadata);
             Assert.Equal("Never Gonna Give You Up", result.Item.Name);
             Assert.Equal("The official video for “Never Gonna Give You Up” by Rick Astley", result.Item.Overview);
             Assert.Equal(2009, result.Item.ProductionYear);
-            Assert.Equal("10/25/2009 12:00:00 AM", result.Item.PremiereDate.ToString());
+            Assert.Equal("20091025", (result.Item.PremiereDate ?? DateTime.Now).ToString("yyyyMMdd"));
             Assert.Equal("Rick Astley", result.People[0].Name);
             Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.People[0].ProviderIds[Constants.PLUGIN_NAME]);
             Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
@@ -99,7 +100,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
             Assert.Equal("Music", result.Item.Name);
             Assert.Equal("The official video for “Never Gonna Give You Up” by Rick Astley", result.Item.Overview);
             Assert.Equal(2009, result.Item.ProductionYear);
-            Assert.Equal("10/25/2009 12:00:00 AM", result.Item.PremiereDate.ToString());
+            Assert.Equal("20091025", (result.Item.PremiereDate ?? DateTime.Now).ToString("yyyyMMdd"));
             Assert.Equal("Rick Astley", result.People[0].Name);
             Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.People[0].ProviderIds[Constants.PLUGIN_NAME]);
             Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
@@ -113,7 +114,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
             Assert.Equal("Never Gonna Give You Up", result.Item.Name);
             Assert.Equal("The official video for “Never Gonna Give You Up” by Rick Astley", result.Item.Overview);
             Assert.Equal(2009, result.Item.ProductionYear);
-            Assert.Equal("10/25/2009 12:00:00 AM", result.Item.PremiereDate.ToString());
+            Assert.Equal("20091025", (result.Item.PremiereDate ?? DateTime.Now).ToString("yyyyMMdd"));
             Assert.Equal("Rick Astley", result.People[0].Name);
             Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.People[0].ProviderIds[Constants.PLUGIN_NAME]);
             Assert.Equal("20091025-Never Gonna Give You Up", result.Item.ForcedSortName);
