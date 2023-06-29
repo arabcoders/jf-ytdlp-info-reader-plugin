@@ -12,9 +12,12 @@ env:
   DOTNET_VERSION: '6.0.300' # The .NET SDK version to use
 
 jobs:
-  build:
-    name: build
-    runs-on: ubuntu-latest
+  test_build:
+    name: test-${{matrix.os}}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -33,8 +36,27 @@ jobs:
 
     - name: Test
       run: dotnet test --no-restore --verbosity normal
-      # Tests need to be updated to not fail, so ignore for now but still run
-      continue-on-error: false
+      continue-on-error: true
+
+  build:
+    needs: test_build
+    name: build_package
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Install dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
 
     - name: Publish
       run: dotnet publish --configuration Release --no-restore --output bin
