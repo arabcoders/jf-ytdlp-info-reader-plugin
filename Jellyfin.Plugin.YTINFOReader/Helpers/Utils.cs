@@ -174,19 +174,17 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             {
                 date = DateTime.ParseExact(json.upload_date, "yyyyMMdd", null);
             }
-            catch
-            {
-            }
+            catch { }
             result.Item.ProductionYear = date.Year;
             result.Item.PremiereDate = date;
             result.Item.ForcedSortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
             result.AddPerson(Utils.CreatePerson(json.uploader, json.channel_id));
-            result.Item.IndexNumber = 1;
+            result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd"));
+            result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyy"));
             if (json.file_path != null)
             {
                 result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("hhmm"));
             }
-            result.Item.ParentIndexNumber = 1;
             result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
 
             return result;

@@ -118,8 +118,8 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
             Assert.Equal("Rick Astley", result.People[0].Name);
             Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.People[0].ProviderIds[Constants.PLUGIN_NAME]);
             Assert.Equal("20091025-Never Gonna Give You Up", result.Item.ForcedSortName);
-            Assert.Equal(1, result.Item.IndexNumber);
-            Assert.Equal(1, result.Item.ParentIndexNumber);
+            Assert.Equal(11025, result.Item.IndexNumber);
+            Assert.Equal(2009, result.Item.ParentIndexNumber);
             Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
         }
 
