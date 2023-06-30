@@ -4,6 +4,7 @@ using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
+using MediaBrowser.Model.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -81,11 +82,13 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         /// <param name="metaFile"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static YTDLData ReadYTDLInfo(string fpath, CancellationToken cancellationToken)
+        public static YTDLData ReadYTDLInfo(string fpath, FileSystemMetadata path, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             string jsonString = File.ReadAllText(fpath);
-            return JsonSerializer.Deserialize<YTDLData>(jsonString);
+            YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString);
+            data.file_path = path;
+            return data;
         }
 
         /// <summary>
@@ -179,6 +182,10 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             result.Item.ForcedSortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
             result.AddPerson(Utils.CreatePerson(json.uploader, json.channel_id));
             result.Item.IndexNumber = 1;
+            if (json.file_path != null)
+            {
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("hhmmss"));
+            }
             result.Item.ParentIndexNumber = 1;
             result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
 

@@ -53,7 +53,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             {
                 return Task.FromResult(result);
             }
-            var infoJson = Utils.ReadYTDLInfo(infoPath, cancellationToken);
+            var infoJson = Utils.ReadYTDLInfo(infoPath, directoryService.GetFile(info.Path), cancellationToken);
             result = Utils.YTDLJsonToSeries(infoJson);
             _logger.LogDebug("YTLocalSeries GetMetadata Result: {Result}", result);
             return Task.FromResult(result);

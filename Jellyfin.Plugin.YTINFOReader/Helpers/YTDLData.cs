@@ -17,6 +17,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         public string track { get; set; }
         public string artist { get; set; }
         public string album { get; set; }
+#nullable enable
+        public MediaBrowser.Model.IO.FileSystemMetadata? file_path { get; set; }
+#nullable disable
         public List<ThumbnailInfo> thumbnails { get; set; }
     }
 }
