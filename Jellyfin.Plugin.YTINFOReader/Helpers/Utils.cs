@@ -184,7 +184,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             result.Item.IndexNumber = 1;
             if (json.file_path != null)
             {
-                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("hhmmss"));
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("hhmm"));
             }
             result.Item.ParentIndexNumber = 1;
             result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);

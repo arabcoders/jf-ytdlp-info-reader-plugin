@@ -4,8 +4,9 @@ This project based on Ankenyr [jellyfin-youtube-metadata-plugin](/ankenyr/jellyf
 and added what we think make sense for episodes numbers, if you follow active channels like we do, you will notice that
 some episodes will have problems in sorting or numbering, we fixed some issues that relates to what we need.
 
-Episodes are named `1` + `MMddhhss`, for example if the episode date is `2022-06-01 05:33:44` the episode Index number should be
-`10601053344` this should sort active channels match better.
+Episodes are named `1` + `MMddhh`, for example if the episode date is `2022-06-01 05:33:44` the episode Index number should be
+`106010533` this should sort active channels match better. we wanted to add seconds to the Index number, but sadly due to the limitation
+of int32 we are unable to do so.
 
 ## Overview
 Plugin for [Jellyfin](https://jellyfin.org/) that retrieves metadata for content from yt-dlp `info.json` files.

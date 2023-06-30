@@ -140,7 +140,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
                         if (episode.PremiereDate.HasValue)
                         {
                             DateTime PremiereDate = episode.PremiereDate ?? DateTime.UtcNow;
-                            episode.IndexNumber = int.Parse("1" + PremiereDate.ToString("MMdd") + _fileSystem.GetLastWriteTimeUtc(episode.Path).ToString("hhmmss"));
+                            episode.IndexNumber = int.Parse("1" + PremiereDate.ToString("MMdd") + _fileSystem.GetLastWriteTimeUtc(episode.Path).ToString("hhmm"));
                             _logger.LogDebug("Episode [{Name} - {Date:MM/dd/yyyy}] should now be number {IndexNumber}", episode.Name, episode.PremiereDate, episode.IndexNumber);
                         }
                         else
