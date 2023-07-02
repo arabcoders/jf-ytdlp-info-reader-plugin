@@ -1,4 +1,4 @@
-name: build
+name: Test Commits
 
 on:
   workflow_call:
