@@ -38,8 +38,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.nuget/packages
-          key: ${{ matrix.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: ${{ matrix.os }}-nuget
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: ${{ runner.os }}-nuget
 
       - name: Install dependencies
         run: dotnet restore
@@ -95,7 +95,9 @@ jobs:
           echo "::set-output name=release_tag::${tag}"
           echo "::set-output name=filename::${release_name}.zip"
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags')
+        uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GH_TOKEN }}"
           name: "${{ steps.create_package.outputs.release_tag }}"
