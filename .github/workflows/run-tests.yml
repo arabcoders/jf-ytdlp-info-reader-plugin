@@ -1,0 +1,19 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - "*"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+  pull_request:
+    branches:
+      - "master"
+    paths:
+      - "**.cs"
+      - "**.csproj"
+
+jobs:
+  Tests:
+    uses: ./.github/workflows/tests.yml
