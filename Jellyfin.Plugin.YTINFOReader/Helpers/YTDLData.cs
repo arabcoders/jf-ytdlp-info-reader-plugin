@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.YTINFOReader.Helpers
 {
@@ -17,8 +18,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         public string track { get; set; }
         public string artist { get; set; }
         public string album { get; set; }
-        public string epoch { get; set; }
 #nullable enable
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public long? epoch { get; set; }
         public MediaBrowser.Model.IO.FileSystemMetadata? file_path { get; set; }
 #nullable disable
         public List<ThumbnailInfo> thumbnails { get; set; }

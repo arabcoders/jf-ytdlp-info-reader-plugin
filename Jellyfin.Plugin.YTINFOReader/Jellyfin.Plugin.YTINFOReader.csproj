@@ -2,11 +2,10 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<RootNamespace>Jellyfin.Plugin.YTINFOReader</RootNamespace>
-		<AssemblyVersion>1.0.0.2</AssemblyVersion>
-		<FileVersion>1.0.0.2</FileVersion>
-		<Version>1.0.0.2</Version>
+		<AssemblyVersion>1.0.0.3</AssemblyVersion>
+		<FileVersion>1.0.0.3</FileVersion>
+		<Version>1.0.0.3</Version>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <RestoreLockedMode>true</RestoreLockedMode>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Configuration\configPage.html" />
