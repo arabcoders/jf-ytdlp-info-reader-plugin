@@ -181,11 +181,20 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             result.AddPerson(Utils.CreatePerson(json.uploader, json.channel_id));
             result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd"));
             result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyy"));
+            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
+
+            // If the json data has epoch, do not bother calling file data.
+            if (!string.IsNullOrEmpty(json.epoch))
+            {
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(long.Parse(json.epoch)).ToString("hhmm"));
+                return result;
+            }
+
+            // if no json.epoch is found fallback to file last modification time.
             if (json.file_path != null)
             {
                 result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("hhmm"));
             }
-            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
 
             return result;
         }
