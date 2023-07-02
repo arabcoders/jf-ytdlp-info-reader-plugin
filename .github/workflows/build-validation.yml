@@ -1,85 +1,66 @@
-name: build
+name: Publish Package
 
 on:
   push:
-  pull_request:
-    branches: [ master ]
-    paths:
-    - '**.cs'
-    - '**.csproj'
+    tags:
+      - "*"
 
 env:
-  DOTNET_VERSION: '6.0.300' # The .NET SDK version to use
+  DOTNET_VERSION: "6.0.x"
 
 jobs:
-  test_build:
-    name: test-${{matrix.os}}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Install dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
-      continue-on-error: true
-
-  build:
-    needs: test_build
+  Tests:
+    uses: ./.github/workflows/tests.yml
+  publish:
+    needs: Tests
     name: build_package
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Install dependencies
-      run: dotnet restore
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+      - name: restore cached dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: ${{ runner.os }}-nuget
 
-    - name: Publish
-      run: dotnet publish --configuration Release --no-restore --output bin
+      - name: Install dependencies
+        run: dotnet restore
 
-    - name: Package
-      id: create_package
-      shell: bash
-      run: |
-        tag=$(git describe --tags --always)
-        release_name="YTINFOReader-${tag}"
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
 
-        # Pack files
-        7z a -tzip "${release_name}.zip" "./bin/*.dll"
-        echo "::set-output name=release_name::${release_name}"
-        echo "::set-output name=release_tag::${tag}"
-        echo "::set-output name=filename::${release_name}.zip"
+      - name: Publish
+        run: dotnet publish --configuration Release --no-restore --output bin
 
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GH_TOKEN }}"
-        name: "${{ steps.create_package.outputs.release_tag }}"
-        automatic_release_tag: "${{ steps.create_package.outputs.release_tag }}"
-        prerelease: true
-          #          "${{ steps.create_package.outputs.filename }}"
-        files: |
-          *.zip
+      - name: Package
+        id: create_package
+        shell: bash
+        run: |
+          tag=$(git describe --tags --always)
+          release_name="YTINFOReader-${tag}"
+
+          # Pack files
+          7z a -tzip "${release_name}.zip" "./bin/*.dll"
+          echo "::set-output name=release_name::${release_name}"
+          echo "::set-output name=release_tag::${tag}"
+          echo "::set-output name=filename::${release_name}.zip"
+
+      - name: Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GH_TOKEN }}"
+          name: "${{ steps.create_package.outputs.release_tag }}"
+          automatic_release_tag: "${{ steps.create_package.outputs.release_tag }}"
+          prerelease: true
+          files: |
+            *.zip
