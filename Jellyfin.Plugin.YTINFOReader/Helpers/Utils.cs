@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -86,7 +87,10 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         {
             cancellationToken.ThrowIfCancellationRequested();
             string jsonString = File.ReadAllText(fpath);
-            YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString);
+            YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString, new JsonSerializerOptions
+            {
+                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
+            });
             data.file_path = path;
             return data;
         }
@@ -184,9 +188,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
 
             // If the json data has epoch, do not bother calling file data.
-            if (!string.IsNullOrEmpty(json.epoch))
+            if (json.epoch != null)
             {
-                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(long.Parse(json.epoch)).ToString("hhmm"));
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.epoch ?? new long()).ToString("hhmm"));
                 return result;
             }
 

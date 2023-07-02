@@ -1,16 +1,14 @@
 ﻿using Xunit;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
-using Newtonsoft.Json;
 using MediaBrowser.Controller;
 using Moq;
 using System.Collections.Generic;
-using MediaBrowser.Controller.Providers;
-using MediaBrowser.Controller.Entities.Movies;
 using System;
 using System.IO;
 using Jellyfin.Plugin.YTINFOReader.Helpers;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace Jellyfin.Plugin.YTINFOReader.Tests
 {
@@ -63,7 +61,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
                 ProviderIds = new Dictionary<string, string> { { Constants.PLUGIN_NAME, "UCuAXFkgsw1L7xaCfnd5JJOw" } }
             };
 
-            Assert.Equal(JsonConvert.SerializeObject(expected), JsonConvert.SerializeObject(result));
+            Assert.Equal(JsonSerializer.Serialize(expected), JsonSerializer.Serialize(result));
         }
 
         [Fact]
@@ -127,7 +125,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         public void YTDLJsonToSeriesTest()
         {
             var result = Utils.YTDLJsonToSeries(GetYouTubeChannelData());
-
+            System.Diagnostics.Debug.WriteLine(JsonSerializer.Serialize(GetYouTubeChannelData()));
             Assert.True(result.HasMetadata);
             Assert.Equal("Rick Astley", result.Item.Name);
             Assert.Equal("Official YouTube channel for Rick Astley.", result.Item.Overview);
@@ -136,31 +134,14 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
 
         public static YTDLData GetYouTubeVideoData()
         {
-            return new YTDLData
-            {
-                id = "dQw4w9WgXcQ",
-                title = "Never Gonna Give You Up",
-                track = "Music",
-                artist = "Rick Astley",
-                description = "The official video for “Never Gonna Give You Up” by Rick Astley",
-                upload_date = "20091025",
-                uploader = "Rick Astley",
-                channel_id = "UCuAXFkgsw1L7xaCfnd5JJOw",
-                epoch = "1673637911"
-            };
+            string jsonString = "{\"id\":\"dQw4w9WgXcQ\",\"uploader\":\"Rick Astley\",\"upload_date\":\"20091025\",\"title\":\"Never Gonna Give You Up\",\"description\":\"The official video for “Never Gonna Give You Up” by Rick Astley\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":\"Music\",\"artist\":\"Rick Astley\",\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null}";
+            return System.Text.Json.JsonSerializer.Deserialize<YTDLData>(jsonString) ?? new YTDLData();
         }
 
         public static YTDLData GetYouTubeChannelData()
         {
-            return new YTDLData
-            {
-                id = "UCuAXFkgsw1L7xaCfnd5JJOw",
-                title = "Rick Astley",
-                description = "Official YouTube channel for Rick Astley.",
-                uploader = "Rick Astley",
-                channel_id = "UCuAXFkgsw1L7xaCfnd5JJOw",
-                epoch = "1673637911"
-            };
+            string jsonString = "{\"id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"uploader\":\"Rick Astley\",\"upload_date\":null,\"title\":\"Rick Astley\",\"description\":\"Official YouTube channel for Rick Astley.\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":null,\"artist\":null,\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null}";
+            return System.Text.Json.JsonSerializer.Deserialize<YTDLData>(jsonString) ?? new YTDLData();
         }
     }
 }
