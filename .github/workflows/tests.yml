@@ -5,11 +5,15 @@ on:
   push:
     branches:
       - "*"
-    tags:
-      - "*"
     paths-ignore:
       - "**.md"
       - ".github/**"
+  pull_request:
+    branches:
+      - "master"
+    paths:
+      - "**.cs"
+      - "**.csproj"
 
 env:
   DOTNET_VERSION: "6.0.x"

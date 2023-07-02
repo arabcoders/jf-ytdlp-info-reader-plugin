@@ -59,7 +59,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GH_TOKEN }}"
-          name: "${{ steps.create_package.outputs.release_tag }}"
+          title: "${{ steps.create_package.outputs.release_tag }}"
           automatic_release_tag: "${{ steps.create_package.outputs.release_tag }}"
           prerelease: true
           files: |
