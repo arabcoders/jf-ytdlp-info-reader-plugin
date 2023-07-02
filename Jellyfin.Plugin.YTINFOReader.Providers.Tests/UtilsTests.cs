@@ -118,7 +118,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
             Assert.Equal("Rick Astley", result.People[0].Name);
             Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.People[0].ProviderIds[Constants.PLUGIN_NAME]);
             Assert.Equal("20091025-Never Gonna Give You Up", result.Item.ForcedSortName);
-            Assert.Equal(11025, result.Item.IndexNumber);
+            Assert.Equal(110250725, result.Item.IndexNumber);
             Assert.Equal(2009, result.Item.ParentIndexNumber);
             Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
         }
@@ -145,7 +145,8 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
                 description = "The official video for “Never Gonna Give You Up” by Rick Astley",
                 upload_date = "20091025",
                 uploader = "Rick Astley",
-                channel_id = "UCuAXFkgsw1L7xaCfnd5JJOw"
+                channel_id = "UCuAXFkgsw1L7xaCfnd5JJOw",
+                epoch = "1673637911"
             };
         }
 
@@ -157,7 +158,8 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
                 title = "Rick Astley",
                 description = "Official YouTube channel for Rick Astley.",
                 uploader = "Rick Astley",
-                channel_id = "UCuAXFkgsw1L7xaCfnd5JJOw"
+                channel_id = "UCuAXFkgsw1L7xaCfnd5JJOw",
+                epoch = "1673637911"
             };
         }
     }
