@@ -10,7 +10,7 @@ of int32 we are unable to do so. And for seasons, it should reflect the year and
 
 The reason we prefix the episode numbers by `1` is because we use two month digit, thus if you have episodes that aired `2023-07-02 00:00:00` and `2023-10-02 00:00:00`,
  it will prevent the `10-02` episode from appearing before the `07-02` episodes. Usually `0` is not counted in the index so if we do not add `1` before the
- index number the episodes index will be `7020000` vs `10020000`.
+ index number the episodes index will be `70020000` vs `10020000`.
 
  The hours and minutes are pulled from the `epoch` field in the JSON file, if the `.info.json` file is very old and does not have the variable,
  the plugin fallback on file last modification time.
