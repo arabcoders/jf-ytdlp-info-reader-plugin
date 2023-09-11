@@ -31,11 +31,12 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             matcher.AddInclude("**/*.jpg");
             matcher.AddInclude("**/*.png");
             matcher.AddInclude("**/*.webp");
-            Regex rx = new Regex(Constants.CHANNEL_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex rxc = new Regex(Constants.CHANNEL_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex rxp = new Regex(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
             string infoPath = "";
             foreach (string file in matcher.GetResultsInFullPath(path))
             {
-                if (rx.IsMatch(file))
+                if (rxc.IsMatch(file) || rxp.IsMatch(file))
                 {
                     infoPath = file;
                     break;
