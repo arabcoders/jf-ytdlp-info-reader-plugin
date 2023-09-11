@@ -50,6 +50,25 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
             Assert.Equal(expected, result);
         }
 
+        [Theory]
+        [InlineData("Foo", "")]
+        [InlineData("Cool playlist [PLirUFnHsz2_v-j-wQfot7uYSeoRgFv0K0].info.json", "PLirUFnHsz2_v-j-wQfot7uYSeoRgFv0K0")]
+        [InlineData("Cool playlist [youtube-PLirUFnHsz2_v-j-wQfot7uYSeoRgFv0K0].info.json", "PLirUFnHsz2_v-j-wQfot7uYSeoRgFv0K0")]
+        [InlineData("Cool playlist using channel id [UCU_fSrQkYzBBe9jtep0EIIg].info.json", "")]
+        [InlineData("Cool playlist using channel id [youtube-UCU_fSrQkYzBBe9jtep0EIIg].info.json", "")]
+        public void GetYouTubePlaylistIds(string fn, string expected)
+        {
+            var rxp = new Regex(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var result = "";
+            if (rxp.IsMatch(fn))
+            {
+                MatchCollection match = rxp.Matches(fn);
+                result = match[0].Groups["id"].ToString();
+            }
+
+            Assert.Equal(expected, result);
+        }
+
         [Fact]
         public void CreatePersonTest()
         {

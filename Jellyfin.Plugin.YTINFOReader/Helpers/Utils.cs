@@ -40,6 +40,13 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
                 return match[0].Groups["id"].ToString();
             }
 
+            var rxp = new Regex(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (rxp.IsMatch(name))
+            {
+                MatchCollection match = rxp.Matches(name);
+                return match[0].Groups["id"].ToString();
+            }
+
             var rx = new Regex(Constants.VIDEO_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
             if (rx.IsMatch(name))
             {
