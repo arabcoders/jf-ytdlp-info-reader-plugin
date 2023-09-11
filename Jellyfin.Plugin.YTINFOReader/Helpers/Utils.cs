@@ -222,9 +222,29 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
                 HasMetadata = true,
                 Item = item
             };
-            result.Item.Name = json.uploader;
+
+            var identifier = json.channel_id;
+            var nameEx = "[" + json.id + "]";
+            result.Item.Name = json.title;
             result.Item.Overview = json.description;
-            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.channel_id);
+
+            var rxc = new Regex(Constants.CHANNEL_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (rxc.IsMatch(nameEx))
+            {
+                MatchCollection match = rxc.Matches(nameEx);
+                identifier = match[0].Groups["id"].ToString();
+            }
+            else
+            {
+                var rxp = new Regex(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                if (rxp.IsMatch(nameEx))
+                {
+                    MatchCollection match = rxp.Matches(nameEx);
+                    identifier = match[0].Groups["id"].ToString();
+                }
+            }
+
+            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, identifier);
             return result;
         }
     }
