@@ -12,12 +12,17 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.YTINFOReader.Helpers
 {
     public class Utils
     {
-        public static bool IsFresh(MediaBrowser.Model.IO.FileSystemMetadata fileInfo)
+#nullable enable
+        public static ILogger? Logger { get; set; }
+#nullable disable
+
+        public static bool IsFresh(FileSystemMetadata fileInfo)
         {
             if (fileInfo.Exists && DateTime.UtcNow.Subtract(fileInfo.LastWriteTimeUtc).Days <= 10)
             {
@@ -124,11 +129,10 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             }
             catch
             {
-
             }
             result.Item.ProductionYear = date.Year;
             result.Item.PremiereDate = date;
-            result.AddPerson(Utils.CreatePerson(json.uploader, json.channel_id));
+            result.AddPerson(CreatePerson(json.uploader, json.channel_id));
             result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
 
             return result;
@@ -147,7 +151,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
                 HasMetadata = true,
                 Item = item
             };
-            result.Item.Name = String.IsNullOrEmpty(json.track) ? json.title : json.track;
+            result.Item.Name = string.IsNullOrEmpty(json.track) ? json.title : json.track;
             result.Item.Artists = new List<string> { json.artist };
             result.Item.Album = json.album;
             result.Item.Overview = json.description;
@@ -159,7 +163,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             catch { }
             result.Item.ProductionYear = date.Year;
             result.Item.PremiereDate = date;
-            result.AddPerson(Utils.CreatePerson(json.uploader, json.channel_id));
+            result.AddPerson(CreatePerson(json.uploader, json.channel_id));
             result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
 
             return result;
@@ -189,7 +193,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             result.Item.ProductionYear = date.Year;
             result.Item.PremiereDate = date;
             result.Item.ForcedSortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
-            result.AddPerson(Utils.CreatePerson(json.uploader, json.channel_id));
+            result.AddPerson(CreatePerson(json.uploader, json.channel_id));
             result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd"));
             result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyy"));
             result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
@@ -197,6 +201,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             // If the json data has epoch, do not bother calling file data.
             if (json.epoch != null)
             {
+                Logger?.LogDebug($"Using epoch for episode index number for {json.id} {json.title}.");
                 result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.epoch ?? new long()).ToString("hhmm"));
                 return result;
             }
@@ -204,7 +209,13 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             // if no json.epoch is found fallback to file last modification time.
             if (json.file_path != null)
             {
+                Logger?.LogDebug($"Using file last write time for episode index number for {json.id} {json.title}.");
                 result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("hhmm"));
+            }
+
+            if (json.file_path == null && json.epoch == null)
+            {
+                Logger?.LogError($"No file or epoch data found for e{json.id} {json.title}.");
             }
 
             return result;

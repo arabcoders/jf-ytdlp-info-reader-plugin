@@ -9,6 +9,7 @@ using System.IO;
 using Jellyfin.Plugin.YTINFOReader.Helpers;
 using System.Text.RegularExpressions;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.YTINFOReader.Tests
 {
@@ -126,7 +127,12 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         [Fact]
         public void YTDLJsonToEpisodeTest()
         {
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            ILogger logger = loggerFactory.CreateLogger<Utils>();
+            Utils.Logger = logger;
+
             var result = Utils.YTDLJsonToEpisode(GetYouTubeVideoData());
+
             Assert.True(result.HasMetadata);
             Assert.Equal("Never Gonna Give You Up", result.Item.Name);
             Assert.Equal("The official video for “Never Gonna Give You Up” by Rick Astley", result.Item.Overview);

@@ -4,7 +4,6 @@ using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.IO;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
-using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -21,8 +20,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 
         public LocalSeriesProvider(IFileSystem fileSystem, ILogger<LocalSeriesProvider> logger)
         {
-            _fileSystem = fileSystem;
             _logger = logger;
+            Utils.Logger = logger;
+            _fileSystem = fileSystem;
         }
 
         private string GetSeriesInfo(string path)
@@ -50,7 +50,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger.LogDebug("YTLocalSeries GetMetadata: {Path}", info.Path);
             MetadataResult<Series> result = new();
             string infoPath = GetSeriesInfo(info.Path);
-            if (String.IsNullOrEmpty(infoPath))
+            if (string.IsNullOrEmpty(infoPath))
             {
                 return Task.FromResult(result);
             }
@@ -75,7 +75,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger.LogDebug("YTLocalSeries HasChanged: {Path}", item.Path);
             var infoPath = GetSeriesInfo(item.Path);
             var result = false;
-            if (!String.IsNullOrEmpty(infoPath))
+            if (!string.IsNullOrEmpty(infoPath))
             {
                 var infoJson = GetInfoJson(infoPath);
                 result = infoJson.Exists && _fileSystem.GetLastWriteTimeUtc(infoJson) < item.DateLastSaved;

@@ -22,8 +22,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 
         public LocalImageProvider(IFileSystem fileSystem, ILogger<LocalImageProvider> logger)
         {
-            _fileSystem = fileSystem;
             _logger = logger;
+            Utils.Logger = logger;
+            _fileSystem = fileSystem;
         }
         public bool Supports(BaseItem item) => item is Movie || item is Episode || item is MusicVideo;
 
@@ -58,14 +59,14 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger.LogDebug("YTLocalImage GetImages: {Name}", item.Name);
             var list = new List<LocalImageInfo>();
             string jpgPath = GetSeriesInfo(item.ContainingFolderPath);
-            if (String.IsNullOrEmpty(jpgPath))
+            if (string.IsNullOrEmpty(jpgPath))
             {
                 return list;
             }
-            var localimg = new LocalImageInfo();
+            var localImg = new LocalImageInfo();
             var fileInfo = _fileSystem.GetFileSystemInfo(jpgPath);
-            localimg.FileInfo = fileInfo;
-            list.Add(localimg);
+            localImg.FileInfo = fileInfo;
+            list.Add(localImg);
             return list;
         }
     }
