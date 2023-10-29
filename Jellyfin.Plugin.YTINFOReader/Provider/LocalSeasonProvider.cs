@@ -16,13 +16,16 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
         public LocalSeasonProvider(ILogger<LocalSeasonProvider> logger)
         {
             _logger = logger;
+            Utils.Logger = logger;
         }
         public Task<MetadataResult<Season>> GetMetadata(ItemInfo info, IDirectoryService directoryService, CancellationToken cancellationToken)
         {
             _logger.LogDebug("YTLocalSeason GetMetadata: {Path}", info.Path);
             MetadataResult<Season> result = new();
-            var item = new Season();
-            item.Name = Path.GetFileNameWithoutExtension(info.Path);
+            var item = new Season
+            {
+                Name = Path.GetFileNameWithoutExtension(info.Path)
+            };
             result.Item = item;
             result.HasMetadata = true;
             return Task.FromResult(result);

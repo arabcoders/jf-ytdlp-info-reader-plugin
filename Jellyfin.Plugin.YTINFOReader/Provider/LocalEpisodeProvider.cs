@@ -8,9 +8,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
     public class LocalEpisodeProvider : AbstractLocalProvider<LocalEpisodeProvider, Episode>
     {
-        public LocalEpisodeProvider(IFileSystem fileSystem, ILogger<LocalEpisodeProvider> logger) : base(fileSystem, logger) { }
-
         public override string Name => Constants.PLUGIN_NAME;
+
+        public LocalEpisodeProvider(IFileSystem fileSystem, ILogger<LocalEpisodeProvider> logger) : base(fileSystem, logger) { }
 
         internal override MetadataResult<Episode> GetMetadataImpl(YTDLData jsonObj)
         {

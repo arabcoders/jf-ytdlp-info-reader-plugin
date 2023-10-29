@@ -21,8 +21,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 
         public AbstractLocalProvider(IFileSystem fileSystem, ILogger<B> logger)
         {
-            _fileSystem = fileSystem;
             _logger = logger;
+            Utils.Logger = logger;
+            _fileSystem = fileSystem;
         }
 
         protected FileSystemMetadata GetInfoJson(string path)
@@ -37,7 +38,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
         }
 
         /// <summary>
-        /// Returns bolean if item has changed since last recorded.
+        /// Returns boolean if item has changed since last recorded.
         /// </summary>
         /// <param name="item"></param>
         /// <param name="directoryService"></param>
