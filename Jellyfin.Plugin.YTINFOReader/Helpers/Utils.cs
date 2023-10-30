@@ -199,20 +199,18 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
 
 
-            // append file last write time to index number if available.
-            if (json.file_path != null)
-            {
-                Logger?.LogDebug($"Using file last write time for episode index number for {json.id} {json.title}.");
-                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("hhmm"));
-                return result;
-            }
-
             // if no file was found, use epoch time.
             if (json.epoch != null)
             {
                 Logger?.LogDebug($"Using epoch for episode index number for {json.id} {json.title}.");
-                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.epoch ?? new long()).ToString("hhmm"));
-                return result;
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.epoch ?? new long()).ToString("HHmm"));
+            }
+
+            // append file last write time to index number if available.
+            if (json.epoch == null && json.file_path != null)
+            {
+                Logger?.LogDebug($"Using file last write time for episode index number for {json.id} {json.title}.");
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("HHmm"));
             }
 
             if (json.file_path == null && json.epoch == null)
