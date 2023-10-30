@@ -203,14 +203,14 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             if (json.epoch != null)
             {
                 Logger?.LogDebug($"Using epoch for episode index number for {json.id} {json.title}.");
-                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.epoch ?? new long()).ToString("HHmm"));
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.epoch ?? new long()).ToString("mmss"));
             }
 
             // append file last write time to index number if available.
             if (json.epoch == null && json.file_path != null)
             {
                 Logger?.LogDebug($"Using file last write time for episode index number for {json.id} {json.title}.");
-                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("HHmm"));
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("mmss"));
             }
 
             if (json.file_path == null && json.epoch == null)
