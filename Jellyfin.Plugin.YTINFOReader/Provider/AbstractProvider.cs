@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
-    public abstract class AbstractProvider<B, T, E> : IRemoteMetadataProvider<T, E>
+    public abstract class AbstractProvider<B, T, E> : IRemoteMetadataProvider<T, E>, IHasItemChangeMonitor
         where T : BaseItem, IHasLookupInfo<E>
         where E : ItemLookupInfo, new()
     {
@@ -64,6 +64,25 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger.LogDebug("YTAP GetMetadata Result: {JSON}", jsonObj.ToString());
 
             return Task.FromResult(GetMetadataImpl(jsonObj));
+        }
+
+        public virtual bool HasChanged(BaseItem item, IDirectoryService directoryService)
+        {
+            _logger.LogDebug("YTAP HasChanged: {Path}", item.Path);
+            var infoFile = Path.ChangeExtension(item.Path, "info.json");
+
+            if (!File.Exists(infoFile))
+            {
+                _logger.LogDebug("YTAP HasChanged: No json file was found for [{Path}].", item.Path);
+                return false;
+            }
+
+            FileSystemMetadata infoJson = _fileSystem.GetFileSystemInfo(infoFile);
+            bool result = infoJson.Exists && _fileSystem.GetLastWriteTimeUtc(infoJson) < item.DateLastSaved;
+
+            _logger.LogDebug("YTAP HasChanged Result: {Result}", result.ToString());
+
+            return result;
         }
 
         internal abstract MetadataResult<T> GetMetadataImpl(YTDLData jsonObj);

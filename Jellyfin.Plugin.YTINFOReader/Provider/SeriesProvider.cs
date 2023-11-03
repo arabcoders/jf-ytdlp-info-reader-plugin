@@ -77,7 +77,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             return file;
         }
 
-        public bool HasChanged(BaseItem item, IDirectoryService directoryService)
+        public override bool HasChanged(BaseItem item, IDirectoryService directoryService)
         {
             _logger.LogDebug("YTIR Series HasChanged: {Path}", item.Path);
             var infoPath = GetSeriesInfo(item.Path);
