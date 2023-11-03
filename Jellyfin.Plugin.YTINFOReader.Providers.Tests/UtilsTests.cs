@@ -21,12 +21,12 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         [InlineData("ChannelName - 20190113 - this is a test title [youtube-dQw4w9WgXcQ].mkv", "dQw4w9WgXcQ")]
         public void GetYouTubeChannelOrVideoIds(string fn, string expected)
         {
-            var rxc = new Regex(Constants.VIDEO_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
 
             var result = "";
-            if (rxc.IsMatch(fn))
+            if (Utils.RX_V.IsMatch(fn))
             {
-                MatchCollection match = rxc.Matches(fn);
+                MatchCollection match = Utils.RX_V.Matches(fn);
                 result = match[0].Groups["id"].ToString();
             }
 
@@ -40,11 +40,11 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         [InlineData("ChannelName Videos [youtube-HCuAXFkgsw1L7xaCfnd5JJOw].info.json", "HCuAXFkgsw1L7xaCfnd5JJOw")]
         public void GetYouTubeChannelIds(string fn, string expected)
         {
-            var rxc = new Regex(Constants.CHANNEL_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var result = "";
-            if (rxc.IsMatch(fn))
+
+            if (Utils.RX_C.IsMatch(fn))
             {
-                MatchCollection match = rxc.Matches(fn);
+                MatchCollection match = Utils.RX_C.Matches(fn);
                 result = match[0].Groups["id"].ToString();
             }
 
@@ -59,11 +59,10 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         [InlineData("Cool playlist using channel id [youtube-UCU_fSrQkYzBBe9jtep0EIIg].info.json", "")]
         public void GetYouTubePlaylistIds(string fn, string expected)
         {
-            var rxp = new Regex(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var result = "";
-            if (rxp.IsMatch(fn))
+            if (Utils.RX_P.IsMatch(fn))
             {
-                MatchCollection match = rxp.Matches(fn);
+                MatchCollection match = Utils.RX_P.Matches(fn);
                 result = match[0].Groups["id"].ToString();
             }
 
@@ -87,9 +86,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         [Fact]
         public void GetVideoInfoPathTest()
         {
-            var mockAppPath = Mock.Of<IServerApplicationPaths>(a =>
-                a.CachePath == Path.Combine("foo", "bar").ToString()
-            );
+            var mockAppPath = Mock.Of<IServerApplicationPaths>(a => a.CachePath == Path.Combine("foo", "bar").ToString());
 
             var result = Utils.GetVideoInfoPath(mockAppPath, "id123");
             Assert.Equal(Path.Combine("foo", "bar", Constants.PLUGIN_NAME, "id123", "ytvideo.info.json").ToString(), result);
@@ -127,10 +124,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         [Fact]
         public void YTDLJsonToEpisodeTest()
         {
-            using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-            ILogger logger = loggerFactory.CreateLogger<Utils>();
-            Utils.Logger = logger;
-
             var result = Utils.YTDLJsonToEpisode(GetYouTubeVideoData());
 
             Assert.True(result.HasMetadata);
@@ -160,13 +153,20 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         public static YTDLData GetYouTubeVideoData()
         {
             string jsonString = "{\"id\":\"dQw4w9WgXcQ\",\"uploader\":\"Rick Astley\",\"upload_date\":\"20091025\",\"title\":\"Never Gonna Give You Up\",\"description\":\"The official video for “Never Gonna Give You Up” by Rick Astley\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":\"Music\",\"artist\":\"Rick Astley\",\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null}";
-            return JsonSerializer.Deserialize<YTDLData>(jsonString) ?? new YTDLData();
+            return JsonSerializer.Deserialize<YTDLData>(jsonString, Utils.JSON_OPTS) ?? new YTDLData();
         }
 
         public static YTDLData GetYouTubeChannelData()
         {
             string jsonString = "{\"id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"uploader\":\"Rick Astley\",\"upload_date\":null,\"title\":\"Rick Astley\",\"description\":\"Official YouTube channel for Rick Astley.\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":null,\"artist\":null,\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null}";
-            return JsonSerializer.Deserialize<YTDLData>(jsonString) ?? new YTDLData();
+            return JsonSerializer.Deserialize<YTDLData>(jsonString, Utils.JSON_OPTS) ?? new YTDLData();
+        }
+
+        private static void SetLogger()
+        {
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            ILogger logger = loggerFactory.CreateLogger<UtilsTest>();
+            Utils.Logger = logger;
         }
     }
 }
