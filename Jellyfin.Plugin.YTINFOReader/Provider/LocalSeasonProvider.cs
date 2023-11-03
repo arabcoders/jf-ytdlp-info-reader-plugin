@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Providers;
 using Microsoft.Extensions.Logging;
@@ -9,7 +9,7 @@ using Jellyfin.Plugin.YTINFOReader.Helpers;
 
 namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
-    public class LocalSeasonProvider : ILocalMetadataProvider<Season>, IHasItemChangeMonitor
+    public class LocalSeasonProvider : ILocalMetadataProvider<Season>
     {
         protected readonly ILogger<LocalSeasonProvider> _logger;
         public string Name => Constants.PLUGIN_NAME;
@@ -18,9 +18,10 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger = logger;
             Utils.Logger = logger;
         }
+
         public Task<MetadataResult<Season>> GetMetadata(ItemInfo info, IDirectoryService directoryService, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("YTLocalSeason GetMetadata: {Path}", info.Path);
+            _logger.LogDebug("YTIR Series Season GetMetadata: {Path}", info.Path);
             MetadataResult<Season> result = new();
             var item = new Season
             {
@@ -29,10 +30,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             result.Item = item;
             result.HasMetadata = true;
             return Task.FromResult(result);
-        }
-        public bool HasChanged(BaseItem item, IDirectoryService directoryService)
-        {
-            return true;
         }
     }
 }

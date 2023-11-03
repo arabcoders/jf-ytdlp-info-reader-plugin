@@ -18,6 +18,15 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
 {
     public class Utils
     {
+        public static readonly Regex RX_C = new(Constants.CHANNEL_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static readonly Regex RX_P = new(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static readonly Regex RX_V = new(Constants.VIDEO_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static readonly JsonSerializerOptions JSON_OPTS = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
+        };
+
 #nullable enable
         public static ILogger? Logger { get; set; }
 #nullable disable
@@ -32,32 +41,40 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         }
 
         /// <summary>
+        /// Returns boolean if the given content is youtube.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static bool IsYouTubeContent(string name)
+        {
+            return RX_C.IsMatch(name) || RX_P.IsMatch(name) || RX_V.IsMatch(name);
+        }
+
+        /// <summary>
         ///  Returns the Youtube ID from the file path. Matches last 11 character field inside square brackets.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
         public static string GetYTID(string name)
         {
-            var rxc = new Regex(Constants.CHANNEL_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            if (rxc.IsMatch(name))
+            if (RX_C.IsMatch(name))
             {
-                MatchCollection match = rxc.Matches(name);
+                MatchCollection match = RX_C.Matches(name);
                 return match[0].Groups["id"].ToString();
             }
 
-            var rxp = new Regex(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            if (rxp.IsMatch(name))
+            if (RX_P.IsMatch(name))
             {
-                MatchCollection match = rxp.Matches(name);
+                MatchCollection match = RX_P.Matches(name);
                 return match[0].Groups["id"].ToString();
             }
 
-            var rx = new Regex(Constants.VIDEO_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            if (rx.IsMatch(name))
+            if (RX_V.IsMatch(name))
             {
-                MatchCollection match = rx.Matches(name);
+                MatchCollection match = RX_V.Matches(name);
                 return match[0].Groups["id"].ToString();
             }
+
             return "";
         }
 
@@ -93,17 +110,17 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         /// Reads JSON data from file.
         /// </summary>
         /// <param name="metaFile"></param>
+        /// <param name="FileSystemMetadata"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static YTDLData ReadYTDLInfo(string fpath, FileSystemMetadata path, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             string jsonString = File.ReadAllText(fpath);
-            YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString, new JsonSerializerOptions
-            {
-                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
-            });
-            data.file_path = path;
+
+            YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString, JSON_OPTS);
+
+            data.File_path = path;
             return data;
         }
 
@@ -114,26 +131,27 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         /// <returns></returns>
         public static MetadataResult<Movie> YTDLJsonToMovie(YTDLData json)
         {
+            Logger?.LogInformation($"Processing episode {json}.");
             var item = new Movie();
             var result = new MetadataResult<Movie>
             {
                 HasMetadata = true,
                 Item = item
             };
-            result.Item.Name = json.title.Trim();
-            result.Item.Overview = json.description.Trim();
+            result.Item.Name = json.Title.Trim();
+            result.Item.Overview = json.Description.Trim();
             var date = new DateTime(1970, 1, 1);
             try
             {
-                date = DateTime.ParseExact(json.upload_date, "yyyyMMdd", null);
+                date = DateTime.ParseExact(json.Upload_date, "yyyyMMdd", null);
             }
             catch
             {
             }
             result.Item.ProductionYear = date.Year;
             result.Item.PremiereDate = date;
-            result.AddPerson(CreatePerson(json.uploader.Trim(), json.channel_id));
-            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
+            result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
+            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
 
             return result;
         }
@@ -145,26 +163,27 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         /// <returns></returns>
         public static MetadataResult<MusicVideo> YTDLJsonToMusicVideo(YTDLData json)
         {
+            Logger?.LogInformation($"Processing episode {json}.");
             var item = new MusicVideo();
             var result = new MetadataResult<MusicVideo>
             {
                 HasMetadata = true,
                 Item = item
             };
-            result.Item.Name = string.IsNullOrEmpty(json.track) ? json.title.Trim() : json.track.Trim();
-            result.Item.Artists = new List<string> { json.artist };
-            result.Item.Album = json.album;
-            result.Item.Overview = json.description.Trim();
+            result.Item.Name = string.IsNullOrEmpty(json.Track) ? json.Title.Trim() : json.Track.Trim();
+            result.Item.Artists = new List<string> { json.Artist };
+            result.Item.Album = json.Album;
+            result.Item.Overview = json.Description.Trim();
             var date = new DateTime(1970, 1, 1);
             try
             {
-                date = DateTime.ParseExact(json.upload_date, "yyyyMMdd", null);
+                date = DateTime.ParseExact(json.Upload_date, "yyyyMMdd", null);
             }
             catch { }
             result.Item.ProductionYear = date.Year;
             result.Item.PremiereDate = date;
-            result.AddPerson(CreatePerson(json.uploader.Trim(), json.channel_id));
-            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
+            result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
+            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
 
             return result;
         }
@@ -176,46 +195,48 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         /// <returns></returns>
         public static MetadataResult<Episode> YTDLJsonToEpisode(YTDLData json)
         {
+            Logger?.LogInformation($"Processing episode {json}.");
             var item = new Episode();
             var result = new MetadataResult<Episode>
             {
                 HasMetadata = true,
                 Item = item
             };
-            result.Item.Name = json.title.Trim();
-            result.Item.Overview = json.description.Trim();
+            Logger?.LogInformation($"Processing episode {json}.");
+            result.Item.Name = json.Title.Trim();
+            result.Item.Overview = json.Description.Trim();
             var date = new DateTime(1970, 1, 1);
             try
             {
-                date = DateTime.ParseExact(json.upload_date, "yyyyMMdd", null);
+                date = DateTime.ParseExact(json.Upload_date, "yyyyMMdd", null);
             }
             catch { }
             result.Item.ProductionYear = date.Year;
             result.Item.PremiereDate = date;
             result.Item.ForcedSortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
-            result.AddPerson(CreatePerson(json.uploader.Trim(), json.channel_id));
+            result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
             result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd"));
             result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyy"));
-            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.id);
+            result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
 
 
             // if no file was found, use epoch time.
-            if (json.epoch != null)
+            if (json.Epoch != null)
             {
-                Logger?.LogDebug($"Using epoch for episode index number for {json.id} {json.title}.");
-                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.epoch ?? new long()).ToString("mmss"));
+                Logger?.LogDebug($"Using epoch for episode index number for {json.Id} {json.Title}.");
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.Epoch ?? new long()).ToString("mmss"));
             }
 
             // append file last write time to index number if available.
-            if (json.epoch == null && json.file_path != null)
+            if (json.Epoch == null && json.File_path != null)
             {
-                Logger?.LogDebug($"Using file last write time for episode index number for {json.id} {json.title}.");
-                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.file_path.LastWriteTimeUtc.ToString("mmss"));
+                Logger?.LogDebug($"Using file last write time for episode index number for {json.Id} {json.Title}.");
+                result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.File_path.LastWriteTimeUtc.ToString("mmss"));
             }
 
-            if (json.file_path == null && json.epoch == null)
+            if (json.File_path == null && json.Epoch == null)
             {
-                Logger?.LogError($"No file or epoch data found for e{json.id} {json.title}.");
+                Logger?.LogError($"No file or epoch data found for e{json.Id} {json.Title}.");
             }
 
             return result;
@@ -227,6 +248,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         /// <returns></returns>
         public static MetadataResult<Series> YTDLJsonToSeries(YTDLData json)
         {
+            Logger?.LogInformation($"Processing episode {json}.");
             var item = new Series();
             var result = new MetadataResult<Series>
             {
@@ -234,23 +256,21 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
                 Item = item
             };
 
-            var identifier = json.channel_id;
-            var nameEx = "[" + json.id + "]";
-            result.Item.Name = json.title.Trim();
-            result.Item.Overview = json.description.Trim();
+            var identifier = json.Channel_id;
+            var nameEx = "[" + json.Id + "]";
+            result.Item.Name = json.Title.Trim();
+            result.Item.Overview = json.Description.Trim();
 
-            var rxc = new Regex(Constants.CHANNEL_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            if (rxc.IsMatch(nameEx))
+            if (RX_C.IsMatch(nameEx))
             {
-                MatchCollection match = rxc.Matches(nameEx);
+                MatchCollection match = RX_C.Matches(nameEx);
                 identifier = match[0].Groups["id"].ToString();
             }
             else
             {
-                var rxp = new Regex(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                if (rxp.IsMatch(nameEx))
+                if (RX_P.IsMatch(nameEx))
                 {
-                    MatchCollection match = rxp.Matches(nameEx);
+                    MatchCollection match = RX_P.Matches(nameEx);
                     identifier = match[0].Groups["id"].ToString();
                 }
             }

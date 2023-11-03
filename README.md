@@ -50,7 +50,7 @@ For Video files it follow the same rules as the channel format.
 1. Ensure you have .NET Core SDK setup and installed.
 1. Build plugin with following command.
     ```
-    dotnet publish --configuration Release --output bin
+    dotnet publish Jellyfin.Plugin.YTINFOReader --configuration Release --output bin
     ```
 1. Create folder named `YTINFOReader` in the `plugins` directory inside your Jellyfin data
    directory. You can find your directory by going to Dashboard, and noticing the Paths section.

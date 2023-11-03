@@ -5,58 +5,65 @@ using MediaBrowser.Model.IO;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.YTINFOReader.Helpers;
+using MediaBrowser.Controller.Configuration;
+using System.Net.Http;
 
 namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
-    public class LocalSeriesProvider : ILocalMetadataProvider<Series>, IHasItemChangeMonitor
+    public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInfo>, IHasItemChangeMonitor
     {
-        public string Name => Constants.PLUGIN_NAME;
-        protected readonly ILogger<LocalSeriesProvider> _logger;
-        protected readonly IFileSystem _fileSystem;
-
-        public LocalSeriesProvider(IFileSystem fileSystem, ILogger<LocalSeriesProvider> logger)
+        public SeriesProvider(
+            IFileSystem fileSystem,
+            IHttpClientFactory httpClientFactory,
+            ILogger<SeriesProvider> logger,
+            IServerConfigurationManager config,
+            System.IO.Abstractions.IFileSystem afs) : base(fileSystem, httpClientFactory, logger, config, afs)
         {
-            _logger = logger;
-            Utils.Logger = logger;
-            _fileSystem = fileSystem;
         }
+
+        public override string Name => Constants.PLUGIN_NAME;
+        internal override MetadataResult<Series> GetMetadataImpl(YTDLData jsonObj) => Utils.YTDLJsonToSeries(jsonObj);
 
         private string GetSeriesInfo(string path)
         {
-            _logger.LogDebug("YTLocalSeries GetSeriesInfo: {Path}", path);
+            _logger.LogDebug("YTIR Series GetSeriesInfo: {Path}", path);
             Matcher matcher = new();
             matcher.AddInclude("**/*.info.json");
-            Regex rxc = new Regex(Constants.CHANNEL_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            Regex rxp = new Regex(Constants.PLAYLIST_RX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
             string infoPath = "";
             foreach (string file in matcher.GetResultsInFullPath(path))
             {
-                if (rxc.IsMatch(file) || rxp.IsMatch(file))
+                if (Utils.RX_C.IsMatch(file) || Utils.RX_P.IsMatch(file))
                 {
                     infoPath = file;
                     break;
                 }
             }
-            _logger.LogDebug("YTLocalSeries GetSeriesInfo Result: {InfoPath}", infoPath);
+            _logger.LogDebug("YTIR Series GetSeriesInfo Result: {InfoPath}", infoPath);
             return infoPath;
         }
 
-        public Task<MetadataResult<Series>> GetMetadata(ItemInfo info, IDirectoryService directoryService, CancellationToken cancellationToken)
+        public override Task<MetadataResult<Series>> GetMetadata(SeriesInfo info, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("YTLocalSeries GetMetadata: {Path}", info.Path);
             MetadataResult<Series> result = new();
+
+            if (!Utils.IsYouTubeContent(info.Path))
+            {
+                _logger.LogDebug("YTIR Series GetMetadata: not a youtube series. [{Path}].", info.Path);
+                return Task.FromResult(result);
+            }
+
             string infoPath = GetSeriesInfo(info.Path);
             if (string.IsNullOrEmpty(infoPath))
             {
                 return Task.FromResult(result);
             }
-            var infoJson = Utils.ReadYTDLInfo(infoPath, directoryService.GetFile(info.Path), cancellationToken);
+
+            var infoJson = Utils.ReadYTDLInfo(infoPath, _fileSystem.GetFileSystemInfo(info.Path), cancellationToken);
             result = Utils.YTDLJsonToSeries(infoJson);
-            _logger.LogDebug("YTLocalSeries GetMetadata Result: {Result}", result);
+            _logger.LogDebug("YTIR Series GetMetadata Result: {Result}", result);
             return Task.FromResult(result);
         }
 
@@ -72,7 +79,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 
         public bool HasChanged(BaseItem item, IDirectoryService directoryService)
         {
-            _logger.LogDebug("YTLocalSeries HasChanged: {Path}", item.Path);
+            _logger.LogDebug("YTIR Series HasChanged: {Path}", item.Path);
             var infoPath = GetSeriesInfo(item.Path);
             var result = false;
             if (!string.IsNullOrEmpty(infoPath))
@@ -80,9 +87,8 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
                 var infoJson = GetInfoJson(infoPath);
                 result = infoJson.Exists && _fileSystem.GetLastWriteTimeUtc(infoJson) < item.DateLastSaved;
             }
-            _logger.LogDebug("YTLocalSeries HasChanged Result: {Result}", result);
+            _logger.LogDebug("YTIR Series HasChanged Result: {Result}", result);
             return result;
-
         }
     }
 }
