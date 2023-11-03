@@ -53,6 +53,12 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
         {
             _logger.LogDebug("YTIR Series Image GetImages: {Name}", item.Name);
             var list = new List<LocalImageInfo>();
+
+            if (!Utils.IsYouTubeContent(item.Path))
+            {
+                return list;
+            }
+
             string jpgPath = GetSeriesInfo(item.Path);
             if (string.IsNullOrEmpty(jpgPath))
             {

@@ -21,14 +21,24 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 
         public Task<MetadataResult<Season>> GetMetadata(ItemInfo info, IDirectoryService directoryService, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("YTIR Series Season GetMetadata: {Path}", info.Path);
             MetadataResult<Season> result = new();
+
+            if (!Utils.IsYouTubeContent(info.Path))
+            {
+                _logger.LogDebug("YTAP Season GetMetadata: is not youtube content [{Path}].", info.Path);
+                return Task.FromResult(result);
+            }
+
+            _logger.LogDebug("YTIR Season GetMetadata: {Path}", info.Path);
+
             var item = new Season
             {
                 Name = Path.GetFileNameWithoutExtension(info.Path)
             };
+
             result.Item = item;
             result.HasMetadata = true;
+
             return Task.FromResult(result);
         }
     }

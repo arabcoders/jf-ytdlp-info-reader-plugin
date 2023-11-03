@@ -40,27 +40,23 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 
         public abstract string Name { get; }
 
-        /// <summary>
-        /// Retrieves metadata of item.
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         public virtual Task<MetadataResult<T>> GetMetadata(E info, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("YTAP GetMetadata: {Path}", info.Path);
             MetadataResult<T> result = new();
 
             if (!Utils.IsYouTubeContent(info.Path))
             {
-                _logger.LogDebug("YTAP GetMetadata: is not youtube content. [{Path}].", info.Path);
+                _logger.LogDebug("YTAP GetMetadata: is not youtube content [{Path}].", info.Path);
                 return Task.FromResult(result);
             }
+
+            _logger.LogDebug("YTAP GetMetadata: {Path}", info.Path);
 
             var infoFile = Path.ChangeExtension(info.Path, "info.json");
 
             if (!File.Exists(infoFile))
             {
+                _logger.LogDebug("YTAP GetMetadata: No json file was found for [{Path}].", info.Path);
                 return Task.FromResult(result);
             }
 
