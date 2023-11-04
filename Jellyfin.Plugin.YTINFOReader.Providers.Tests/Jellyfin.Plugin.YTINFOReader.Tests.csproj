@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\Jellyfin.Plugin.YTINFOReader\Jellyfin.Plugin.YTINFOReader.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Jellyfin.Controller" Version="10.8.0-beta2" />
     <PackageReference Include="Jellyfin.Data" Version="10.8.0" />
@@ -24,9 +25,4 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Jellyfin.Plugin.YTINFOReader\Jellyfin.Plugin.YTINFOReader.csproj" />
-  </ItemGroup>
-
 </Project>

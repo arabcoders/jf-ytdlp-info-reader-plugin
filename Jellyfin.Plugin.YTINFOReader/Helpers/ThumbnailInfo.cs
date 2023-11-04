@@ -7,10 +7,10 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
     /// </summary>
     public class ThumbnailInfo
     {
-        public string url { get; set; }
-        public int width { get; set; }
-        public int height { get; set; }
-        public string resolution { get; set; }
-        public string id { get; set; }
+        public string Url { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public string Resolution { get; set; }
+        public string Id { get; set; }
     }
 }

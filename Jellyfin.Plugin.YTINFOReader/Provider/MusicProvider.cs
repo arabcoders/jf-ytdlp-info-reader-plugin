@@ -10,17 +10,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
     public class MusicProvider : AbstractProvider<MusicProvider, MusicVideo, MusicVideoInfo>
     {
-        public MusicProvider(
-            IFileSystem fileSystem,
-            IHttpClientFactory httpClientFactory,
-            ILogger<MusicProvider> logger,
-            IServerConfigurationManager config,
-            System.IO.Abstractions.IFileSystem afs) : base(fileSystem, httpClientFactory, logger, config, afs)
-        {
-        }
+        public MusicProvider(IFileSystem fileSystem, ILogger<MusicProvider> logger) : base(fileSystem, logger) { }
 
         public override string Name => Constants.PLUGIN_NAME;
-
         internal override MetadataResult<MusicVideo> GetMetadataImpl(YTDLData jsonObj) => Utils.YTDLJsonToMusicVideo(jsonObj);
 
     }

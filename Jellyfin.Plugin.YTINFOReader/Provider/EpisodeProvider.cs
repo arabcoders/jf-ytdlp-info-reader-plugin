@@ -10,18 +10,8 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
     public class EpisodeProvider : AbstractProvider<EpisodeProvider, Episode, EpisodeInfo>
     {
-        public EpisodeProvider(
-            IFileSystem fileSystem,
-            IHttpClientFactory httpClientFactory,
-            ILogger<EpisodeProvider> logger,
-            IServerConfigurationManager config,
-            System.IO.Abstractions.IFileSystem afs) : base(fileSystem, httpClientFactory, logger, config, afs)
-        {
-        }
-
+        public EpisodeProvider(IFileSystem fileSystem, ILogger<EpisodeProvider> logger) : base(fileSystem, logger) { }
         public override string Name => Constants.PLUGIN_NAME;
-
         internal override MetadataResult<Episode> GetMetadataImpl(YTDLData jsonObj) => Utils.YTDLJsonToEpisode(jsonObj);
-
     }
 }

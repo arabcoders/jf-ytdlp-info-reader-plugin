@@ -21,8 +21,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         [InlineData("ChannelName - 20190113 - this is a test title [youtube-dQw4w9WgXcQ].mkv", "dQw4w9WgXcQ")]
         public void GetYouTubeChannelOrVideoIds(string fn, string expected)
         {
-
-
             var result = "";
             if (Utils.RX_V.IsMatch(fn))
             {
@@ -32,7 +30,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
 
             Assert.Equal(expected, result);
         }
-
         [Theory]
         [InlineData("Foo", "")]
         [InlineData("ChannelName Videos [UCuAXFkgsw1L7xaCfnd5JJOw].info.json", "UCuAXFkgsw1L7xaCfnd5JJOw")]
@@ -41,16 +38,13 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         public void GetYouTubeChannelIds(string fn, string expected)
         {
             var result = "";
-
             if (Utils.RX_C.IsMatch(fn))
             {
                 MatchCollection match = Utils.RX_C.Matches(fn);
                 result = match[0].Groups["id"].ToString();
             }
-
             Assert.Equal(expected, result);
         }
-
         [Theory]
         [InlineData("Foo", "")]
         [InlineData("Cool playlist [PLirUFnHsz2_v-j-wQfot7uYSeoRgFv0K0].info.json", "PLirUFnHsz2_v-j-wQfot7uYSeoRgFv0K0")]
@@ -65,10 +59,8 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
                 MatchCollection match = Utils.RX_P.Matches(fn);
                 result = match[0].Groups["id"].ToString();
             }
-
             Assert.Equal(expected, result);
         }
-
         [Fact]
         public void CreatePersonTest()
         {
@@ -79,24 +71,19 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
                 Type = PersonType.Director,
                 ProviderIds = new Dictionary<string, string> { { Constants.PLUGIN_NAME, "UCuAXFkgsw1L7xaCfnd5JJOw" } }
             };
-
             Assert.Equal(JsonSerializer.Serialize(expected), JsonSerializer.Serialize(result));
         }
-
         [Fact]
         public void GetVideoInfoPathTest()
         {
             var mockAppPath = Mock.Of<IServerApplicationPaths>(a => a.CachePath == Path.Combine("foo", "bar").ToString());
-
             var result = Utils.GetVideoInfoPath(mockAppPath, "id123");
             Assert.Equal(Path.Combine("foo", "bar", Constants.PLUGIN_NAME, "id123", "ytvideo.info.json").ToString(), result);
         }
-
         [Fact]
         public void YTDLJsonToMovieTest()
         {
             var result = Utils.YTDLJsonToMovie(GetYouTubeVideoData());
-
             Assert.True(result.HasMetadata);
             Assert.Equal("Never Gonna Give You Up", result.Item.Name);
             Assert.Equal("The official video for “Never Gonna Give You Up” by Rick Astley", result.Item.Overview);
@@ -125,7 +112,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Tests
         public void YTDLJsonToEpisodeTest()
         {
             var result = Utils.YTDLJsonToEpisode(GetYouTubeVideoData());
-
             Assert.True(result.HasMetadata);
             Assert.Equal("Never Gonna Give You Up", result.Item.Name);
             Assert.Equal("The official video for “Never Gonna Give You Up” by Rick Astley", result.Item.Overview);
