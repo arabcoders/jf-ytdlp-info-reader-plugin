@@ -26,11 +26,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             PropertyNameCaseInsensitive = true,
             NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
         };
-
 #nullable enable
         public static ILogger? Logger { get; set; }
 #nullable disable
-
         public static bool IsFresh(FileSystemMetadata fileInfo)
         {
             if (fileInfo.Exists && DateTime.UtcNow.Subtract(fileInfo.LastWriteTimeUtc).Days <= 10)
@@ -39,7 +37,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             }
             return false;
         }
-
         /// <summary>
         /// Returns boolean if the given content is youtube.
         /// </summary>
@@ -49,7 +46,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
         {
             return RX_C.IsMatch(name) || RX_P.IsMatch(name) || RX_V.IsMatch(name);
         }
-
         /// <summary>
         ///  Returns the Youtube ID from the file path. Matches last 11 character field inside square brackets.
         /// </summary>
@@ -77,7 +73,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
 
             return "";
         }
-
         /// <summary>
         /// Creates a person object of type director for the provided name.
         /// </summary>
@@ -93,7 +88,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
                 ProviderIds = new Dictionary<string, string> { { Constants.PLUGIN_NAME, channel_id } },
             };
         }
-
         /// <summary>
         /// Returns path to where metadata json file should be.
         /// </summary>
@@ -105,7 +99,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             var dataPath = Path.Combine(appPaths.CachePath, Constants.PLUGIN_NAME, youtubeID);
             return Path.Combine(dataPath, "ytvideo.info.json");
         }
-
         /// <summary>
         /// Reads JSON data from file.
         /// </summary>
@@ -123,7 +116,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             data.File_path = path;
             return data;
         }
-
         /// <summary>
         /// Provides a Movie Metadata Result from a json object.
         /// </summary>
@@ -155,7 +147,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
 
             return result;
         }
-
         /// <summary>
         /// Provides a MusicVideo Metadata Result from a json object.
         /// </summary>
@@ -187,7 +178,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
 
             return result;
         }
-
         /// <summary>
         /// Provides a Episode Metadata Result from a json object.
         /// </summary>
@@ -279,5 +269,4 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
             return result;
         }
     }
-
 }

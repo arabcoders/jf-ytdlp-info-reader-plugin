@@ -14,7 +14,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
         private readonly IFileSystem _fileSystem;
         private readonly ILogger<ImageSeriesProvider> _logger;
         public string Name => Constants.PLUGIN_NAME;
-
         public ImageSeriesProvider(IFileSystem fileSystem, ILogger<ImageSeriesProvider> logger)
         {
             _logger = logger;
@@ -22,10 +21,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _fileSystem = fileSystem;
         }
         public bool Supports(BaseItem item) => item is Series;
-
         private string GetSeriesInfo(string path)
         {
-            _logger.LogDebug("YTIR Series Image GetSeriesInfo: {Path}", path);
+            _logger.LogDebug("YIR Series Image GetSeriesInfo: {Path}", path);
             Matcher matcher = new();
             matcher.AddInclude("**/*.jpg");
             matcher.AddInclude("**/*.png");
@@ -39,10 +37,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
                     break;
                 }
             }
-            _logger.LogDebug("YTIR Series Image GetSeriesInfo Result: {InfoPath}", infoPath);
+            _logger.LogDebug("YIR Series Image GetSeriesInfo Result: {InfoPath}", infoPath);
             return infoPath;
         }
-
         /// <summary>
         /// Retrieves a list of local image information for the specified item.
         /// </summary>
@@ -51,7 +48,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
         /// <returns>A list of local image information for the specified item.</returns>
         public IEnumerable<LocalImageInfo> GetImages(BaseItem item, IDirectoryService directoryService)
         {
-            _logger.LogDebug("YTIR Series Image GetImages: {Name}", item.Name);
+            _logger.LogDebug("YIR Series Image GetImages: {Name}", item.Name);
             var list = new List<LocalImageInfo>();
 
             if (!Utils.IsYouTubeContent(item.Path))
@@ -68,9 +65,8 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             var fileInfo = _fileSystem.GetFileSystemInfo(jpgPath);
             localImg.FileInfo = fileInfo;
             list.Add(localImg);
-            _logger.LogDebug("YTIR Series Image GetImages Result: {Result}", list.ToString());
+            _logger.LogDebug("YIR Series Image GetImages Result: {Result}", list.ToString());
             return list;
         }
-
     }
 }

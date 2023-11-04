@@ -15,18 +15,9 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
     public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInfo>, IHasItemChangeMonitor
     {
-        public SeriesProvider(
-            IFileSystem fileSystem,
-            IHttpClientFactory httpClientFactory,
-            ILogger<SeriesProvider> logger,
-            IServerConfigurationManager config,
-            System.IO.Abstractions.IFileSystem afs) : base(fileSystem, httpClientFactory, logger, config, afs)
-        {
-        }
-
+        public SeriesProvider(IFileSystem fileSystem, ILogger<SeriesProvider> logger) : base(fileSystem, logger) { }
         public override string Name => Constants.PLUGIN_NAME;
         internal override MetadataResult<Series> GetMetadataImpl(YTDLData jsonObj) => Utils.YTDLJsonToSeries(jsonObj);
-
         private string GetSeriesInfo(string path)
         {
             _logger.LogDebug("YTIR Series GetSeriesInfo: {Path}", path);
@@ -44,7 +35,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger.LogDebug("YTIR Series GetSeriesInfo Result: {InfoPath}", infoPath);
             return infoPath;
         }
-
         public override Task<MetadataResult<Series>> GetMetadata(SeriesInfo info, CancellationToken cancellationToken)
         {
             MetadataResult<Series> result = new();
@@ -66,7 +56,6 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger.LogDebug("YTIR Series GetMetadata Result: {Result}", result);
             return Task.FromResult(result);
         }
-
         FileSystemMetadata GetInfoJson(string path)
         {
             var fileInfo = _fileSystem.GetFileSystemInfo(path);
@@ -76,18 +65,19 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             var file = _fileSystem.GetFileInfo(specificFile);
             return file;
         }
-
         public override bool HasChanged(BaseItem item, IDirectoryService directoryService)
         {
-            _logger.LogDebug("YTIR Series HasChanged: {Path}", item.Path);
+            _logger.LogDebug("YIR Series HasChanged: {Path}", item.Path);
             var infoPath = GetSeriesInfo(item.Path);
             var result = false;
             if (!string.IsNullOrEmpty(infoPath))
             {
                 var infoJson = GetInfoJson(infoPath);
-                result = infoJson.Exists && _fileSystem.GetLastWriteTimeUtc(infoJson) < item.DateLastSaved;
+                result = infoJson.Exists && infoJson.LastWriteTimeUtc.ToUniversalTime() > item.DateLastSaved.ToUniversalTime();
             }
-            _logger.LogDebug("YTIR Series HasChanged Result: {Result}", result);
+
+            string status = result ? "Has Changed" : "Has Not Changed";
+            _logger.LogDebug("YIR Series HasChanged Result: {status}", status);
             return result;
         }
     }

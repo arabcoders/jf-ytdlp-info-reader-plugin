@@ -18,18 +18,17 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger = logger;
             Utils.Logger = logger;
         }
-
         public Task<MetadataResult<Season>> GetMetadata(ItemInfo info, IDirectoryService directoryService, CancellationToken cancellationToken)
         {
             MetadataResult<Season> result = new();
 
             if (!Utils.IsYouTubeContent(info.Path))
             {
-                _logger.LogDebug("YTAP Season GetMetadata: is not youtube content [{Path}].", info.Path);
+                _logger.LogDebug("YIR Season GetMetadata: is not youtube content [{Path}].", info.Path);
                 return Task.FromResult(result);
             }
 
-            _logger.LogDebug("YTIR Season GetMetadata: {Path}", info.Path);
+            _logger.LogDebug("YIR Season GetMetadata: {Path}", info.Path);
 
             var item = new Season
             {
