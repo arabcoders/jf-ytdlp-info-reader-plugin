@@ -1,5 +1,4 @@
-name: Publish Package
-
+name: Build
 on:
   push:
     tags:
