@@ -44,26 +44,39 @@ For Video files it follow the same rules as the channel format.
 - `whatever [(youtube-)?dQw4w9WgXcQ].(jpg|png|webp)`
 - `whatever [(youtube-)?dQw4w9WgXcQ].mkv`
 
+
+# Installation
+
+Go to the releases page and download the latest release.
+
+create a folder named `YTINFOReader` in the `plugins` directory inside your Jellyfin data directory. You can find your directory by going to Dashboard, and noticing the Paths section. Mine is the root folder of the default Metadata directory.
+
+Unzip the downloaded file and place the resulting files in the `plugins/YTINFOReader` restart jellyfin.
+
+Go to your YouTube library Make sure `YTINFOReader` is on the top of your `Metadata readers` list. Disable all external metadata sources and only enable `YTINFOReader` in the `Metadata downloaders (TV Shows):` and `Metadata downloaders (Episodes):`.
+
+Tip: Only enable `Image fetchers (Episodes):` - `Screen grabber (FFmpeg)`. if you don't have a local image for the episode, it will be fetched from the video file itself.
+
 ## Build and Installing from source
 
 1. Clone or download this repository.
-1. Ensure you have .NET Core SDK setup and installed.
-1. Build plugin with following command.
+2. Ensure you have .NET Core SDK setup and installed.
+3. Build plugin with following command.
     ```
     dotnet publish Jellyfin.Plugin.YTINFOReader --configuration Release --output bin
     ```
-1. Create folder named `YTINFOReader` in the `plugins` directory inside your Jellyfin data
+4. Create folder named `YTINFOReader` in the `plugins` directory inside your Jellyfin data
    directory. You can find your directory by going to Dashboard, and noticing the Paths section.
    Mine is the root folder of the default Metadata directory.
     ```
     # mkdir <Jellyfin Data Directory>/plugins/YTINFOReader/
     ```
-1. Place the resulting files from step 3 in the `plugins/YTINFOReader` folder created in step 4.
+5. Place the resulting files from step 3 in the `plugins/YTINFOReader` folder created in step 4.
     ```
     # cp -r bin/*.dll <Jellyfin Data Directory>/plugins/YTINFOReader/`
     ```
-1. Be sure that the plugin files are owned by your `jellyfin` user:
+6. Be sure that the plugin files are owned by your `jellyfin` user:
     ```
     # chown -R jellyfin:jellyfin /var/lib/jellyfin/plugins/YTINFOReader/
     ```
-1. If performed correctly you will see a plugin named YTINFOReader in `Admin -> Dashboard -> Advanced -> Plugins`.
+If performed correctly you will see a plugin named YTINFOReader in `Admin -> Dashboard -> Advanced -> Plugins`.
