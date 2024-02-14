@@ -162,8 +162,17 @@ namespace Jellyfin.Plugin.YTINFOReader.Helpers
                 Item = item
             };
             result.Item.Name = string.IsNullOrEmpty(json.Track) ? json.Title.Trim() : json.Track.Trim();
-            result.Item.Artists = new List<string> { json.Artist };
-            result.Item.Album = json.Album;
+            result.Item.Artists = new List<string> { !string.IsNullOrEmpty(json.Artist) ? json.Artist : json.Channel };
+            if (!string.IsNullOrEmpty(json.Album))
+            {
+                result.Item.Album = json.Album;
+            }
+
+            if (!string.IsNullOrEmpty(json.Track))
+            {
+                result.Item.Name = json.Track;
+            }
+
             result.Item.Overview = json.Description.Trim();
             var date = new DateTime(1970, 1, 1);
             try
