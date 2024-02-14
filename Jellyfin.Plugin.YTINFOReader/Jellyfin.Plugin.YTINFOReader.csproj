@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<RootNamespace>Jellyfin.Plugin.YTINFOReader</RootNamespace>
-		<Version>1.1.0.1</Version>
+		<Version>1.1.0.3</Version>
 		<FileVersion>$(Version)</FileVersion>
 		<AssemblyVersion>$(Version)</AssemblyVersion>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
