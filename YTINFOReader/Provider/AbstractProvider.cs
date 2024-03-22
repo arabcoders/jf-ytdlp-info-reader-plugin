@@ -27,7 +27,7 @@ public abstract class AbstractProvider<B, T, E> : IRemoteMetadataProvider<T, E>,
         Utils.Logger = logger;
     }
 
-    public string Name => Constants.PLUGIN_NAME;
+    public abstract string Name { get; }
 
     public virtual Task<MetadataResult<T>> GetMetadata(E info, CancellationToken cancellationToken)
     {
@@ -35,34 +35,36 @@ public abstract class AbstractProvider<B, T, E> : IRemoteMetadataProvider<T, E>,
 
         if (!Utils.IsYouTubeContent(info.Path))
         {
-            _logger.LogDebug("YIR GetMetadata: is not youtube content [{Path}].", info.Path);
+            _logger.LogDebug($"{Name} GetMetadata: is not youtube content '{info.Path}'.");
             return Task.FromResult(result);
         }
 
-        _logger.LogDebug("YIR GetMetadata: {Path}", info.Path);
+        _logger.LogDebug($"{Name} GetMetadata: '{info.Path}'.");
 
         var infoFile = Path.ChangeExtension(info.Path, "info.json");
 
         if (!File.Exists(infoFile))
         {
-            _logger.LogDebug("YIR GetMetadata: No json file was found for [{Path}].", info.Path);
+            _logger.LogDebug($"{Name} GetMetadata: No json file was found for '{info.Path}'.");
             return Task.FromResult(result);
         }
 
         var jsonObj = Utils.ReadYTDLInfo(infoFile, _fileSystem.GetFileSystemInfo(info.Path), cancellationToken);
-        _logger.LogDebug("YIR GetMetadata Result: {JSON}", jsonObj.ToString());
+
+        _logger.LogDebug($"{Name} GetMetadata Result: '{jsonObj}'.");
 
         return Task.FromResult(GetMetadataImpl(jsonObj));
     }
 
     public virtual bool HasChanged(BaseItem item, IDirectoryService directoryService)
     {
-        _logger.LogDebug("YIR HasChanged: {Path}", item.Path);
+        _logger.LogDebug($"{Name} HasChanged: '{item.Path}'.");
+
         var infoFile = Path.ChangeExtension(item.Path, "info.json");
 
         if (!File.Exists(infoFile))
         {
-            _logger.LogDebug("YIR HasChanged: No json file was found for [{Path}].", item.Path);
+            _logger.LogDebug($"{Name} HasChanged: No json file was found for '{item.Path}'.");
             return false;
         }
 
@@ -70,7 +72,7 @@ public abstract class AbstractProvider<B, T, E> : IRemoteMetadataProvider<T, E>,
         bool result = infoJson.Exists && infoJson.LastWriteTimeUtc.ToUniversalTime() > item.DateLastSaved.ToUniversalTime();
         string status = result ? "Has Changed" : "Has Not Changed";
 
-        _logger.LogDebug("YIR HasChanged Result: {status}", status);
+        _logger.LogDebug($"{Name} HasChanged Result: '{status}'.");
 
         return result;
     }

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using MediaBrowser.Model.Providers;
 using System.Threading;
 using System.Net.Http;
+using System.IO;
 
 namespace YTINFOReader;
 
@@ -20,36 +21,61 @@ public class ImageProvider : IRemoteImageProvider
     private readonly ILogger<ImageProvider> _logger;
     private readonly string[] _supportedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
 
-    public string Name => Constants.PLUGIN_NAME;
+    private readonly Matcher _matcher = new();
+
+    public string Name => $"{Constants.PLUGIN_NAME}: Image Provider";
 
     public ImageProvider(IFileSystem fileSystem, ILogger<ImageProvider> logger)
     {
         _logger = logger;
         Utils.Logger = logger;
         _fileSystem = fileSystem;
+
+        for (int i = 0; i < _supportedExtensions.Length; i++)
+        {
+            _matcher.AddInclude($"**/*{_supportedExtensions[i]}");
+        }
+
     }
 
     public bool Supports(BaseItem item) => item is Series || item is Episode;
 
-    private string GetSeriesInfo(string path)
+    private string GetInfo(BaseItem item)
     {
-        _logger.LogDebug("YIR Series Image GetSeriesInfo: {Path}", path);
-        Matcher matcher = new();
-        for (int i = 0; i < _supportedExtensions.Length; i++)
+        var path = item is Episode ? Path.GetDirectoryName(item.Path) : item.Path;
+
+        _logger.LogDebug($"{Name} GetInfo: '{path}'.");
+
+        if (string.IsNullOrEmpty(path))
         {
-            matcher.AddInclude($"**/*{_supportedExtensions[i]}");
+            return "";
         }
 
         string infoPath = "";
-        foreach (string file in matcher.GetResultsInFullPath(path))
+
+        foreach (string file in _matcher.GetResultsInFullPath(path))
         {
-            if (Utils.RX_C.IsMatch(file) || Utils.RX_P.IsMatch(file))
+            switch (item)
             {
-                infoPath = file;
-                break;
+                default:
+                    break;
+                case Series:
+                    if (Utils.RX_C.IsMatch(file) || Utils.RX_P.IsMatch(file))
+                    {
+                        infoPath = file;
+                    }
+                    break;
+                case Episode:
+                    if (Utils.RX_V.IsMatch(file))
+                    {
+                        infoPath = file;
+                    }
+                    break;
             }
         }
-        _logger.LogDebug("YIR Series Image GetSeriesInfo Result: {InfoPath}", infoPath);
+
+        _logger.LogDebug($"{Name} GetInfo Result: '{infoPath}'.");
+
         return infoPath;
     }
 
@@ -61,7 +87,7 @@ public class ImageProvider : IRemoteImageProvider
     /// <returns>A list of local image information for the specified item.</returns>
     public IEnumerable<LocalImageInfo> GetImages(BaseItem item, IDirectoryService directoryService)
     {
-        _logger.LogDebug("YIR Series Image GetImages: {Name}", item.Name);
+        _logger.LogDebug($"{Name} GetImages: {item.Name}");
         var list = new List<LocalImageInfo>();
 
         if (!Utils.IsYouTubeContent(item.Path))
@@ -69,31 +95,23 @@ public class ImageProvider : IRemoteImageProvider
             return list;
         }
 
-        string jpgPath = GetSeriesInfo(item.Path);
+        string jpgPath = GetInfo(item);
         if (string.IsNullOrEmpty(jpgPath))
         {
             return list;
         }
-        var localImg = new LocalImageInfo();
+
         var fileInfo = _fileSystem.GetFileSystemInfo(jpgPath);
-        localImg.FileInfo = fileInfo;
-        list.Add(localImg);
-        _logger.LogDebug("YIR Series Image GetImages Result: {Result}", list.ToString());
+        list.Add(new LocalImageInfo { FileInfo = fileInfo });
+
+        _logger.LogDebug($"{Name} GetImages Result: {list}");
+
         return list;
     }
 
-    public IEnumerable<ImageType> GetSupportedImages(BaseItem item)
-    {
-        return new List<ImageType> { ImageType.Primary };
-    }
+    public IEnumerable<ImageType> GetSupportedImages(BaseItem item) => new List<ImageType> { ImageType.Primary };
 
-    public Task<IEnumerable<RemoteImageInfo>> GetImages(BaseItem item, CancellationToken cancellationToken)
-    {
-        throw new System.NotImplementedException();
-    }
+    public Task<IEnumerable<RemoteImageInfo>> GetImages(BaseItem item, CancellationToken cancellationToken) => throw new System.NotImplementedException();
 
-    public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken)
-    {
-        throw new System.NotImplementedException();
-    }
+    public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken) => throw new System.NotImplementedException();
 }

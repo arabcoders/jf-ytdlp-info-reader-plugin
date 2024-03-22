@@ -116,6 +116,7 @@ public class Utils
     public static YTDLData ReadYTDLInfo(string fpath, FileSystemMetadata path, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
         string jsonString = File.ReadAllText(fpath);
 
         YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString, JSON_OPTS);
@@ -128,10 +129,12 @@ public class Utils
     /// Provides a Movie Metadata Result from a json object.
     /// </summary>
     /// <param name="json"></param>
+    /// <param name="name"></param>
     /// <returns></returns>
-    public static MetadataResult<Movie> YTDLJsonToMovie(YTDLData json)
+    public static MetadataResult<Movie> YTDLJsonToMovie(YTDLData json, string name = "")
     {
-        Logger?.LogDebug($"Processing movie data '{json}'.");
+        Logger?.LogDebug($"{name} Processing: '{json}'.");
+
         var item = new Movie();
         var result = new MetadataResult<Movie>
         {
@@ -145,9 +148,7 @@ public class Utils
         {
             date = DateTime.ParseExact(json.Upload_date, "yyyyMMdd", null);
         }
-        catch
-        {
-        }
+        catch { }
         result.Item.ProductionYear = date.Year;
         result.Item.PremiereDate = date;
         result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
@@ -160,10 +161,11 @@ public class Utils
     /// Provides a MusicVideo Metadata Result from a json object.
     /// </summary>
     /// <param name="json"></param>
+    /// <param name="name"></param>
     /// <returns></returns>
-    public static MetadataResult<MusicVideo> YTDLJsonToMusicVideo(YTDLData json)
+    public static MetadataResult<MusicVideo> YTDLJsonToMusicVideo(YTDLData json, string name = "")
     {
-        Logger?.LogDebug($"Processing music video data '{json}'.");
+        Logger?.LogDebug($"{name} processing: '{json}'.");
         var item = new MusicVideo();
         var result = new MetadataResult<MusicVideo>
         {
@@ -201,10 +203,11 @@ public class Utils
     /// Provides a Episode Metadata Result from a json object.
     /// </summary>
     /// <param name="json"></param>
+    /// <param name="name"></param>
     /// <returns></returns>
-    public static MetadataResult<Episode> YTDLJsonToEpisode(YTDLData json)
+    public static MetadataResult<Episode> YTDLJsonToEpisode(YTDLData json, string name = "")
     {
-        Logger?.LogDebug($"Processing episode data '{json}'.");
+        Logger?.LogDebug($"{name} Processing: '{json}'.");
         var item = new Episode();
         var result = new MetadataResult<Episode>
         {
@@ -232,20 +235,20 @@ public class Utils
         // if no file was found, use epoch time.
         if (json.Epoch != null)
         {
-            Logger?.LogDebug($"Using epoch for episode index number for {json.Id} {json.Title}.");
+            Logger?.LogDebug($"{name} Using epoch for episode index number for '{json.Id}' - '{json.Title}'.");
             result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.Epoch ?? new long()).ToString("mmss"));
         }
 
         // append file last write time to index number if available.
         if (json.Epoch == null && json.File_path != null)
         {
-            Logger?.LogDebug($"Using file last write time for episode index number for {json.Id} {json.Title}.");
+            Logger?.LogDebug($"{name} Using file last write time for episode index number for '{json.Id}'- '{json.Title}'.");
             result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.File_path.LastWriteTimeUtc.ToString("mmss"));
         }
 
         if (json.File_path == null && json.Epoch == null)
         {
-            Logger?.LogError($"No file or epoch data found for e{json.Id} {json.Title}.");
+            Logger?.LogError($"{name} No file or epoch data found for '{json.Id}' - '{json.Title}'.");
         }
 
         return result;
@@ -255,10 +258,11 @@ public class Utils
     /// Provides a MusicVideo Metadata Result from a json object.
     /// </summary>
     /// <param name="json"></param>
+    /// <param name="name"></param>
     /// <returns></returns>
-    public static MetadataResult<Series> YTDLJsonToSeries(YTDLData json)
+    public static MetadataResult<Series> YTDLJsonToSeries(YTDLData json, string name = "")
     {
-        Logger?.LogDebug($"Processing series data '{json}'.");
+        Logger?.LogDebug($"{name} Processing: '{json}'.");
         var item = new Series();
         var result = new MetadataResult<Series>
         {

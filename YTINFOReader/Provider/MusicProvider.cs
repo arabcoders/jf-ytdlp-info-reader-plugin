@@ -9,6 +9,7 @@ namespace YTINFOReader;
 public class MusicProvider : AbstractProvider<MusicProvider, MusicVideo, MusicVideoInfo>
 {
     public MusicProvider(IFileSystem fileSystem, ILogger<MusicProvider> logger) : base(fileSystem, logger) { }
+    public override string Name => $"{Constants.PLUGIN_NAME}: Music Provider";
 
     internal override MetadataResult<MusicVideo> GetMetadataImpl(YTDLData jsonObj) => Utils.YTDLJsonToMusicVideo(jsonObj);
 }

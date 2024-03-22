@@ -13,17 +13,24 @@ namespace YTINFOReader;
 
 public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInfo>, IHasItemChangeMonitor
 {
-    public SeriesProvider(IFileSystem fileSystem, ILogger<SeriesProvider> logger) : base(fileSystem, logger) { }
+    private readonly Matcher _matcher = new();
+
+    public SeriesProvider(IFileSystem fileSystem, ILogger<SeriesProvider> logger) : base(fileSystem, logger)
+    {
+        _matcher.AddInclude("**/*.info.json");
+    }
+
+    public override string Name => $"{Constants.PLUGIN_NAME}: Series Provider";
 
     internal override MetadataResult<Series> GetMetadataImpl(YTDLData jsonObj) => Utils.YTDLJsonToSeries(jsonObj);
 
     private string GetSeriesInfo(string path)
     {
-        _logger.LogDebug("YTIR Series GetSeriesInfo: {Path}", path);
-        Matcher matcher = new();
-        matcher.AddInclude("**/*.info.json");
+        _logger.LogDebug($"{Name} GetSeriesInfo: '{path}'.");
+
         string infoPath = "";
-        foreach (string file in matcher.GetResultsInFullPath(path))
+
+        foreach (string file in _matcher.GetResultsInFullPath(path))
         {
             if (Utils.RX_C.IsMatch(file) || Utils.RX_P.IsMatch(file))
             {
@@ -31,7 +38,9 @@ public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInf
                 break;
             }
         }
-        _logger.LogDebug("YTIR Series GetSeriesInfo Result: {InfoPath}", infoPath);
+
+        _logger.LogDebug($"{Name} GetSeriesInfo Result: '{infoPath}'.");
+
         return infoPath;
     }
 
@@ -41,7 +50,7 @@ public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInf
 
         if (!Utils.IsYouTubeContent(info.Path))
         {
-            _logger.LogDebug("YTIR Series GetMetadata: not a youtube series. [{Path}].", info.Path);
+            _logger.LogDebug($"{Name} GetMetadata: not a youtube series. '{info.Path}'.");
             return Task.FromResult(result);
         }
 
@@ -53,9 +62,12 @@ public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInf
 
         var infoJson = Utils.ReadYTDLInfo(infoPath, _fileSystem.GetFileSystemInfo(info.Path), cancellationToken);
         result = Utils.YTDLJsonToSeries(infoJson);
-        _logger.LogDebug("YTIR Series GetMetadata Result: {Result}", result);
+
+        _logger.LogDebug($"{Name} GetMetadata Result: '{result}'.");
+
         return Task.FromResult(result);
     }
+
     FileSystemMetadata GetInfoJson(string path)
     {
         var fileInfo = _fileSystem.GetFileSystemInfo(path);
@@ -65,9 +77,11 @@ public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInf
         var file = _fileSystem.GetFileInfo(specificFile);
         return file;
     }
+
     public override bool HasChanged(BaseItem item, IDirectoryService directoryService)
     {
-        _logger.LogDebug("YIR Series HasChanged: {Path}", item.Path);
+        _logger.LogDebug($"{Name} HasChanged: '{item.Path}'.");
+
         var infoPath = GetSeriesInfo(item.Path);
         var result = false;
         if (!string.IsNullOrEmpty(infoPath))
@@ -77,7 +91,10 @@ public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInf
         }
 
         string status = result ? "Has Changed" : "Has Not Changed";
-        _logger.LogDebug("YIR Series HasChanged Result: {status}", status);
+
+        _logger.LogDebug($"{Name} HasChanged Result: '{status}'.");
+
         return result;
     }
+
 }
