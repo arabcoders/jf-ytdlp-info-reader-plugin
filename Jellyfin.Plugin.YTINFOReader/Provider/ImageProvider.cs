@@ -6,28 +6,40 @@ using Microsoft.Extensions.Logging;
 using MediaBrowser.Controller.Entities.TV;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Jellyfin.Plugin.YTINFOReader.Helpers;
+using MediaBrowser.Model.Entities;
+using System.Threading.Tasks;
+using MediaBrowser.Model.Providers;
+using System.Threading;
+using System.Net.Http;
 
 namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
-    public class ImageSeriesProvider : ILocalImageProvider
+    public class ImageProvider : IRemoteImageProvider
     {
         private readonly IFileSystem _fileSystem;
-        private readonly ILogger<ImageSeriesProvider> _logger;
+        private readonly ILogger<ImageProvider> _logger;
+        private readonly string[] _supportedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
+
         public string Name => Constants.PLUGIN_NAME;
-        public ImageSeriesProvider(IFileSystem fileSystem, ILogger<ImageSeriesProvider> logger)
+
+        public ImageProvider(IFileSystem fileSystem, ILogger<ImageProvider> logger)
         {
             _logger = logger;
             Utils.Logger = logger;
             _fileSystem = fileSystem;
         }
-        public bool Supports(BaseItem item) => item is Series;
+
+        public bool Supports(BaseItem item) => item is Series || item is Episode;
+
         private string GetSeriesInfo(string path)
         {
             _logger.LogDebug("YIR Series Image GetSeriesInfo: {Path}", path);
             Matcher matcher = new();
-            matcher.AddInclude("**/*.jpg");
-            matcher.AddInclude("**/*.png");
-            matcher.AddInclude("**/*.webp");
+            for (int i = 0; i < _supportedExtensions.Length; i++)
+            {
+                matcher.AddInclude($"**/*{_supportedExtensions[i]}");
+            }
+
             string infoPath = "";
             foreach (string file in matcher.GetResultsInFullPath(path))
             {
@@ -40,6 +52,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger.LogDebug("YIR Series Image GetSeriesInfo Result: {InfoPath}", infoPath);
             return infoPath;
         }
+
         /// <summary>
         /// Retrieves a list of local image information for the specified item.
         /// </summary>
@@ -67,6 +80,21 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             list.Add(localImg);
             _logger.LogDebug("YIR Series Image GetImages Result: {Result}", list.ToString());
             return list;
+        }
+
+        public IEnumerable<ImageType> GetSupportedImages(BaseItem item)
+        {
+            return new List<ImageType> { ImageType.Primary };
+        }
+
+        public Task<IEnumerable<RemoteImageInfo>> GetImages(BaseItem item, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

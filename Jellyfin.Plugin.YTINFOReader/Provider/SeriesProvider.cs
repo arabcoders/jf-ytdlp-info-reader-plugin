@@ -8,16 +8,15 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.YTINFOReader.Helpers;
-using MediaBrowser.Controller.Configuration;
-using System.Net.Http;
 
 namespace Jellyfin.Plugin.YTINFOReader.Provider
 {
     public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInfo>, IHasItemChangeMonitor
     {
         public SeriesProvider(IFileSystem fileSystem, ILogger<SeriesProvider> logger) : base(fileSystem, logger) { }
-        public override string Name => Constants.PLUGIN_NAME;
+
         internal override MetadataResult<Series> GetMetadataImpl(YTDLData jsonObj) => Utils.YTDLJsonToSeries(jsonObj);
+
         private string GetSeriesInfo(string path)
         {
             _logger.LogDebug("YTIR Series GetSeriesInfo: {Path}", path);
@@ -35,6 +34,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             _logger.LogDebug("YTIR Series GetSeriesInfo Result: {InfoPath}", infoPath);
             return infoPath;
         }
+
         public override Task<MetadataResult<Series>> GetMetadata(SeriesInfo info, CancellationToken cancellationToken)
         {
             MetadataResult<Series> result = new();

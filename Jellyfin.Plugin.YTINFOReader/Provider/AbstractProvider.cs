@@ -1,5 +1,4 @@
 using Jellyfin.Plugin.YTINFOReader.Helpers;
-using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.IO;
@@ -28,7 +27,7 @@ namespace Jellyfin.Plugin.YTINFOReader.Provider
             Utils.Logger = logger;
         }
 
-        public abstract string Name { get; }
+        public string Name => Constants.PLUGIN_NAME;
 
         public virtual Task<MetadataResult<T>> GetMetadata(E info, CancellationToken cancellationToken)
         {
