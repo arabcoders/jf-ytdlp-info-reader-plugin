@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
-		<RootNamespace>Jellyfin.Plugin.YTINFOReader</RootNamespace>
+		<RootNamespace>YTINFOReader</RootNamespace>
 		<Version>1.1.0.4</Version>
 		<FileVersion>$(Version)</FileVersion>
 		<AssemblyVersion>$(Version)</AssemblyVersion>

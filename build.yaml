@@ -8,6 +8,6 @@ overview: "Read yt-dlp and compatible INFO json metadata files."
 description: "This plugin add support for reading info.json files generated using yt-dlp and compatible tools for metadata."
 category: "Metadata"
 artifacts:
-  - "Jellyfin.Plugin.YTINFOReader.dll"
+  - "YTINFOReader.dll"
 changelog: >
   changelog

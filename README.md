@@ -66,7 +66,7 @@ Tip: Only enable `Image fetchers (Episodes):` - `Screen grabber (FFmpeg)`. if yo
 2. Ensure you have .NET Core SDK setup and installed.
 3. Build plugin with following command.
     ```
-    dotnet publish Jellyfin.Plugin.YTINFOReader --configuration Release --output bin
+    dotnet publish YTINFOReader --configuration Release --output bin
     ```
 4. Create folder named `YTINFOReader` in the `plugins` directory inside your Jellyfin data
    directory. You can find your directory by going to Dashboard, and noticing the Paths section.

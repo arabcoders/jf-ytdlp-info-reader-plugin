@@ -6,7 +6,7 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Jellyfin.Plugin.YTINFOReader\Jellyfin.Plugin.YTINFOReader.csproj" />
+    <ProjectReference Include="..\YTINFOReader\YTINFOReader.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Jellyfin.Controller" Version="10.8.0-beta2" />
