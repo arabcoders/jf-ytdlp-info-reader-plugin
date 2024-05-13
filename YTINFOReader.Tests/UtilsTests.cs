@@ -10,6 +10,7 @@ using YTINFOReader.Helpers;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Jellyfin.Data.Enums;
 
 namespace YTINFOReader.Tests;
 
@@ -68,7 +69,7 @@ public class UtilsTest
         var expected = new PersonInfo
         {
             Name = "Rick Astley",
-            Type = PersonType.Director,
+            Type = PersonKind.Director,
             ProviderIds = new Dictionary<string, string> { { Constants.PLUGIN_NAME, "UCuAXFkgsw1L7xaCfnd5JJOw" } }
         };
         Assert.Equal(JsonSerializer.Serialize(expected), JsonSerializer.Serialize(result));

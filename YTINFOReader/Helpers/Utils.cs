@@ -13,6 +13,7 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Jellyfin.Data.Enums;
 
 namespace YTINFOReader.Helpers;
 
@@ -89,7 +90,7 @@ public class Utils
         return new PersonInfo
         {
             Name = name,
-            Type = PersonType.Director,
+            Type = PersonKind.Director,
             ProviderIds = new Dictionary<string, string> { { Constants.PLUGIN_NAME, channel_id } },
         };
     }

@@ -119,3 +119,4 @@ MediaBrowser.Plugins.Anime.userprefs
 
 # custom-deploy
 deploy.sh
+custom-deploy.sh
