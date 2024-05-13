@@ -3,7 +3,6 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Providers;
-using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.IO;
 using System;
 using System.Collections.Generic;
@@ -48,6 +47,10 @@ public class Utils
     /// <returns></returns>
     public static bool IsYouTubeContent(string name)
     {
+        if (null == name)
+        {
+            return false;
+        }
         return RX_C.IsMatch(name) || RX_P.IsMatch(name) || RX_V.IsMatch(name);
     }
 
