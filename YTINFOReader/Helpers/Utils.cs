@@ -219,22 +219,47 @@ public class Utils
             Item = item
         };
 
-        result.Item.Name = json.Title.Trim();
-        result.Item.Overview = json.Description.Trim();
-        var date = new DateTime(1970, 1, 1);
-        try
+        if (null == json.Upload_date)
         {
-            date = DateTime.ParseExact(json.Upload_date, "yyyyMMdd", null);
+            Logger?.LogWarning($"{name} No upload date found for '{json.Id}' - '{json.Title}'. This most likely indicates the info.json file is corrupted. or was downloading when the video was deleted.");
         }
-        catch { }
+
+        var date = new DateTime(1970, 1, 1);
+        if (null != json.Upload_date || null != json.Epoch)
+        {
+            try
+            {
+                if (null != json.Upload_date)
+                {
+                    date = DateTime.ParseExact(json.Upload_date, "yyyyMMdd", null);
+                }
+                else
+                {
+                    date = DateTimeOffset.FromUnixTimeSeconds(json.Epoch ?? new long()).DateTime;
+                }
+            }
+            catch { }
+        }
+
+        if (!string.IsNullOrEmpty(json.Title))
+        {
+            result.Item.Name = json.Title.Trim();
+        }
+
+        if (!string.IsNullOrEmpty(json.Description))
+        {
+            result.Item.Overview = json.Description.Trim();
+        }
         result.Item.ProductionYear = date.Year;
         result.Item.PremiereDate = date;
         result.Item.ForcedSortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
-        result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
+        if (null != json.Uploader && null != json.Channel_id)
+        {
+            result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
+        }
         result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd"));
         result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyyMM"));
         result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
-
 
         // if no file was found, use epoch time.
         if (json.Epoch != null)
