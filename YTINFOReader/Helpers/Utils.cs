@@ -258,7 +258,7 @@ public class Utils
             result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
         }
         result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd"));
-        result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyyMM"));
+        result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyy"));
         result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
 
         // if no file was found, use epoch time.
