@@ -252,6 +252,7 @@ public class Utils
         }
         result.Item.ProductionYear = date.Year;
         result.Item.PremiereDate = date;
+        result.Item.SortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
         result.Item.ForcedSortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
         if (null != json.Uploader && null != json.Channel_id)
         {
@@ -261,24 +262,31 @@ public class Utils
         result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyy"));
         result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
 
-        // if no file was found, use epoch time.
+        // -- use json epoch to extends index number to avoid duplicates.
         if (json.Epoch != null)
         {
-            Logger?.LogDebug($"{name} Using epoch for episode index number for '{json.Id}' - '{json.Title}'.");
             result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.Epoch ?? new long()).ToString("mmss"));
         }
 
         // append file last write time to index number if available.
-        if (json.Epoch == null && json.File_path != null)
+        if (null == json.Epoch && null != json.File_path)
         {
-            Logger?.LogDebug($"{name} Using file last write time for episode index number for '{json.Id}'- '{json.Title}'.");
-            result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.File_path.LastWriteTimeUtc.ToString("mmss"));
+            Logger?.LogWarning($"{name} Using file last write time for episode index number for '{json.Id}'- '{json.Title}'.");
+            result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.File_path.CreationTimeUtc.ToString("mmss"));
         }
 
         if (json.File_path == null && json.Epoch == null)
         {
             Logger?.LogError($"{name} No file or epoch data found for '{json.Id}' - '{json.Title}'.");
         }
+
+        if (!result.Item.IndexNumber.HasValue)
+        {
+            Logger?.LogError($"{name} No index number found for '{json.Id}' - '{json.Title}'.");
+            return new MetadataResult<Episode> { HasMetadata = false };
+        }
+
+        Logger?.LogInformation($"{name} Matched '{json.Id}' - '{json.Title}' to 'S{result.Item.ParentIndexNumber}E{result.Item.IndexNumber}'.");
 
         return result;
     }

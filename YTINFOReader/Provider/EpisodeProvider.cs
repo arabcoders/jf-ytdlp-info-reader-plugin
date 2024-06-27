@@ -8,7 +8,9 @@ namespace YTINFOReader;
 
 public class EpisodeProvider : AbstractProvider<EpisodeProvider, Episode, EpisodeInfo>
 {
-    public EpisodeProvider(IFileSystem fileSystem, ILogger<EpisodeProvider> logger) : base(fileSystem, logger) { }
+    public EpisodeProvider(IFileSystem fileSystem, ILogger<EpisodeProvider> logger) : base(fileSystem, logger) {
+        Utils.Logger = logger;
+    }
 
     public override string Name => $"{Constants.PLUGIN_NAME}: Episode Provider";
 
