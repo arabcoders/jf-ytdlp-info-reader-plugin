@@ -153,7 +153,7 @@ public class Utils
         string jsonString = File.ReadAllText(fpath);
 
         YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString, JSON_OPTS);
-        data.Path = path.ToString();
+        data.Path = path.FullName;
 
         return data;
     }
