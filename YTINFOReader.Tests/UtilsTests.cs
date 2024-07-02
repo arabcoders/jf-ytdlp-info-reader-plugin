@@ -16,6 +16,13 @@ namespace YTINFOReader.Tests;
 
 public class UtilsTest
 {
+    private static void SetLogger()
+    {
+        using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        ILogger logger = loggerFactory.CreateLogger<UtilsTest>();
+        Utils.Logger = logger;
+    }
+
     [Theory]
     [InlineData("Foo", "")]
     [InlineData("ChannelName - 20190113 - this is a test title [dQw4w9WgXcQ].mkv", "dQw4w9WgXcQ")]
@@ -122,7 +129,7 @@ public class UtilsTest
         Assert.Equal("Rick Astley", result.People[0].Name);
         Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.People[0].ProviderIds[Constants.PLUGIN_NAME]);
         Assert.Equal("20091025-Never Gonna Give You Up", result.Item.ForcedSortName);
-        Assert.Equal(110252511, result.Item.IndexNumber);
+        Assert.Equal(110259948, result.Item.IndexNumber);
         Assert.Equal(2009, result.Item.ParentIndexNumber);
         Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
     }
@@ -153,11 +160,26 @@ public class UtilsTest
         Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
     }
 
+    [Theory]
+    [InlineData("230629 Yoake no LOVE it! - BAT [720p h264 MP4 CM Cut].mkv", 4957)]
+    [InlineData("240629 Yoake no LOVE it! - FOO [720p h264 MP4 CM Cut].mkv", 4955)]
+    [InlineData("240629 Yoake no LOVE it! - BAR [820p h264 MP4 CM Cut].mkv", 5451)]
+    [InlineData("2406 NO [820p h264 MP4 CM Cut].mkv", 9852)]
+    [InlineData("2306 OK [820p h264 MP4 CM Cut].mkv", 1025)]
+    [InlineData("2206 TEST [820p h264 MP4 CM Cut].mkv", 5398)]
+    public void Test_ExtendId(string filename, int expected)
+    {
+        Assert.Equal(expected, Utils.ExtendId(filename));
+    }
+
     public static YTDLData GetYouTubeVideoData()
     {
         string jsonString = "{\"id\":\"dQw4w9WgXcQ\",\"uploader\":\"Rick Astley\",\"upload_date\":\"20091025\",\"title\":\"Never Gonna Give You Up\",\"description\":\"The official video for “Never Gonna Give You Up” by Rick Astley\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":\"Music\",\"artist\":\"Rick Astley Tester\",\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null}";
-        return JsonSerializer.Deserialize<YTDLData>(jsonString, Utils.JSON_OPTS) ?? new YTDLData();
+        var data = JsonSerializer.Deserialize<YTDLData>(jsonString, Utils.JSON_OPTS) ?? new YTDLData();
+        data.Path = "20091025 Never Gonna Give You Up [youtube-dQw4w9WgXcQ].mkv";
+        return data;
     }
+
     public static YTDLData GetYTMusicWithoutMusicData()
     {
         string jsonString = "{\"id\":\"dQw4w9WgXcQ\",\"uploader\":\"Rick Astley\",\"channel\":\"Rick Astley Test\",\"upload_date\":\"20091025\",\"title\":\"Never Gonna Give You Up\",\"description\":\"The official video for “Never Gonna Give You Up” by Rick Astley\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null}";
@@ -170,10 +192,5 @@ public class UtilsTest
         return JsonSerializer.Deserialize<YTDLData>(jsonString, Utils.JSON_OPTS) ?? new YTDLData();
     }
 
-    private static void SetLogger()
-    {
-        using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        ILogger logger = loggerFactory.CreateLogger<UtilsTest>();
-        Utils.Logger = logger;
-    }
+
 }

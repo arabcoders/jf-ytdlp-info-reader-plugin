@@ -13,6 +13,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Jellyfin.Data.Enums;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace YTINFOReader.Helpers;
 
@@ -38,6 +40,33 @@ public class Utils
             return true;
         }
         return false;
+    }
+
+    public static int ExtendId(string path)
+    {
+        // 1. Get the basename, remove the extension, and convert to lowercase
+        string basename = Path.GetFileNameWithoutExtension(path).ToLower();
+
+        // 2. Hash the basename using SHA-256
+        using SHA256 sha256 = SHA256.Create();
+        byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(basename));
+
+        // 3. Convert the SHA-256 hash to a hexadecimal string
+        string hex = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+
+        // 4. Convert hexadecimal characters to ASCII values
+        StringBuilder asciiValues = new StringBuilder();
+        foreach (char c in hex)
+        {
+            asciiValues.Append(((int)c).ToString());
+        }
+
+        // 5. Get the final 4 digits, ensure it's a 4-digit integer
+        string asciiString = asciiValues.ToString();
+        string fourDigitString = asciiString.Length >= 4 ? asciiString.Substring(0, 4) : asciiString.PadRight(4, '9');
+        int fourDigitNumber = int.Parse(fourDigitString);
+
+        return fourDigitNumber;
     }
 
     /// <summary>
@@ -124,8 +153,8 @@ public class Utils
         string jsonString = File.ReadAllText(fpath);
 
         YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString, JSON_OPTS);
+        data.Path = path.ToString();
 
-        data.File_path = path;
         return data;
     }
 
@@ -262,22 +291,9 @@ public class Utils
         result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyy"));
         result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
 
-        // -- use json epoch to extends index number to avoid duplicates.
-        if (json.Epoch != null)
+        if (!string.IsNullOrEmpty(json.Path))
         {
-            result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.Epoch ?? new long()).ToString("mmss"));
-        }
-
-        // append file last write time to index number if available.
-        if (null == json.Epoch && null != json.File_path)
-        {
-            Logger?.LogWarning($"{name} Using file last write time for episode index number for '{json.Id}'- '{json.Title}'.");
-            result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.File_path.CreationTimeUtc.ToString("mmss"));
-        }
-
-        if (json.File_path == null && json.Epoch == null)
-        {
-            Logger?.LogError($"{name} No file or epoch data found for '{json.Id}' - '{json.Title}'.");
+            result.Item.IndexNumber = int.Parse($"1{date:MMdd}{ExtendId(json.Path)}");
         }
 
         if (!result.Item.IndexNumber.HasValue)
@@ -285,6 +301,7 @@ public class Utils
             Logger?.LogError($"{name} No index number found for '{json.Id}' - '{json.Title}'.");
             return new MetadataResult<Episode> { HasMetadata = false };
         }
+
 
         Logger?.LogInformation($"{name} Matched '{json.Id}' - '{json.Title}' to 'S{result.Item.ParentIndexNumber}E{result.Item.IndexNumber}'.");
 

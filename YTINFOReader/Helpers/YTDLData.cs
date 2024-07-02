@@ -23,7 +23,7 @@ public class YTDLData
 #nullable enable
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long? Epoch { get; set; }
-    public FileSystemMetadata? File_path { get; set; }
+    public string? Path { get; set; }
 #nullable disable
     public List<ThumbnailInfo> Thumbnails { get; set; }
 
