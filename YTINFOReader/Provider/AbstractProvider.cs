@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace YTINFOReader;
+namespace YTINFOReader.Provider;
 
 public abstract class AbstractProvider<B, T, E> : IRemoteMetadataProvider<T, E>, IHasItemChangeMonitor
     where T : BaseItem, IHasLookupInfo<E>
@@ -45,7 +45,7 @@ public abstract class AbstractProvider<B, T, E> : IRemoteMetadataProvider<T, E>,
 
         if (!File.Exists(infoFile))
         {
-            _logger.LogDebug($"{Name} GetMetadata: No json file was found for '{info.Path}'.");
+            _logger.LogError($"{Name} GetMetadata: No json file was found for '{info.Path}'.");
             return Task.FromResult(result);
         }
 

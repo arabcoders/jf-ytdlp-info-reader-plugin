@@ -5,9 +5,6 @@ on:
   push:
     branches:
       - "*"
-    paths-ignore:
-      - "**.md"
-      - ".github/**"
   pull_request:
     branches:
       - "master"
@@ -23,7 +20,7 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -33,7 +30,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: restore cached dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}

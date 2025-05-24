@@ -4,7 +4,7 @@ using MediaBrowser.Model.IO;
 using Microsoft.Extensions.Logging;
 using YTINFOReader.Helpers;
 
-namespace YTINFOReader;
+namespace YTINFOReader.Provider;
 
 public class MusicProvider : AbstractProvider<MusicProvider, MusicVideo, MusicVideoInfo>
 {

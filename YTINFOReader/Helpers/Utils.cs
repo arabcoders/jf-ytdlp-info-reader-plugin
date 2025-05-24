@@ -13,6 +13,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Jellyfin.Data.Enums;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace YTINFOReader.Helpers;
 
@@ -38,6 +40,33 @@ public class Utils
             return true;
         }
         return false;
+    }
+
+    public static int ExtendId(string path)
+    {
+        // 1. Get the basename, remove the extension, and convert to lowercase
+        string basename = Path.GetFileNameWithoutExtension(path).ToLower();
+
+        // 2. Hash the basename using SHA-256
+        using SHA256 sha256 = SHA256.Create();
+        byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(basename));
+
+        // 3. Convert the SHA-256 hash to a hexadecimal string
+        string hex = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+
+        // 4. Convert hexadecimal characters to ASCII values
+        StringBuilder asciiValues = new StringBuilder();
+        foreach (char c in hex)
+        {
+            asciiValues.Append(((int)c).ToString());
+        }
+
+        // 5. Get the final 4 digits, ensure it's a 4-digit integer
+        string asciiString = asciiValues.ToString();
+        string fourDigitString = asciiString.Length >= 4 ? asciiString.Substring(0, 4) : asciiString.PadRight(4, '9');
+        int fourDigitNumber = int.Parse(fourDigitString);
+
+        return fourDigitNumber;
     }
 
     /// <summary>
@@ -124,8 +153,8 @@ public class Utils
         string jsonString = File.ReadAllText(fpath);
 
         YTDLData data = JsonSerializer.Deserialize<YTDLData>(jsonString, JSON_OPTS);
+        data.Path = path.FullName;
 
-        data.File_path = path;
         return data;
     }
 
@@ -219,41 +248,62 @@ public class Utils
             Item = item
         };
 
-        result.Item.Name = json.Title.Trim();
-        result.Item.Overview = json.Description.Trim();
-        var date = new DateTime(1970, 1, 1);
-        try
+        if (null == json.Upload_date)
         {
-            date = DateTime.ParseExact(json.Upload_date, "yyyyMMdd", null);
+            Logger?.LogWarning($"{name} No upload date found for '{json.Id}' - '{json.Title}'. This most likely indicates the info.json file is corrupted. or was downloading when the video was deleted.");
         }
-        catch { }
+
+        var date = new DateTime(1970, 1, 1);
+        if (null != json.Upload_date || null != json.Epoch)
+        {
+            try
+            {
+                if (null != json.Upload_date)
+                {
+                    date = DateTime.ParseExact(json.Upload_date, "yyyyMMdd", null);
+                }
+                else
+                {
+                    date = DateTimeOffset.FromUnixTimeSeconds(json.Epoch ?? new long()).DateTime;
+                }
+            }
+            catch { }
+        }
+
+        if (!string.IsNullOrEmpty(json.Title))
+        {
+            result.Item.Name = json.Title.Trim();
+        }
+
+        if (!string.IsNullOrEmpty(json.Description))
+        {
+            result.Item.Overview = json.Description.Trim();
+        }
         result.Item.ProductionYear = date.Year;
         result.Item.PremiereDate = date;
+        result.Item.SortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
         result.Item.ForcedSortName = date.ToString("yyyyMMdd") + "-" + result.Item.Name;
-        result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
+        if (null != json.Uploader && null != json.Channel_id)
+        {
+            result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
+        }
         result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd"));
-        result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyyMM"));
+        result.Item.ParentIndexNumber = int.Parse(date.ToString("yyyy"));
         result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
 
-
-        // if no file was found, use epoch time.
-        if (json.Epoch != null)
+        if (!string.IsNullOrEmpty(json.Path))
         {
-            Logger?.LogDebug($"{name} Using epoch for episode index number for '{json.Id}' - '{json.Title}'.");
-            result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + DateTimeOffset.FromUnixTimeSeconds(json.Epoch ?? new long()).ToString("mmss"));
+            result.Item.IndexNumber = int.Parse($"1{date:MMdd}{ExtendId(json.Path)}");
         }
 
-        // append file last write time to index number if available.
-        if (json.Epoch == null && json.File_path != null)
+        if (!result.Item.IndexNumber.HasValue)
         {
-            Logger?.LogDebug($"{name} Using file last write time for episode index number for '{json.Id}'- '{json.Title}'.");
-            result.Item.IndexNumber = int.Parse("1" + date.ToString("MMdd") + json.File_path.LastWriteTimeUtc.ToString("mmss"));
+            Logger?.LogError($"{name} No index number found for '{json.Id}' - '{json.Title}'.");
+            return new MetadataResult<Episode> { HasMetadata = false };
         }
 
-        if (json.File_path == null && json.Epoch == null)
-        {
-            Logger?.LogError($"{name} No file or epoch data found for '{json.Id}' - '{json.Title}'.");
-        }
+
+        Logger?.LogInformation($"{name} Matched '{json.Id}' - '{json.Title}' to 'S{result.Item.ParentIndexNumber}E{result.Item.IndexNumber}'.");
 
         return result;
     }

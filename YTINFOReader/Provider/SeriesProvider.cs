@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using YTINFOReader.Helpers;
 
-namespace YTINFOReader;
+namespace YTINFOReader.Provider;
 
 public class SeriesProvider : AbstractProvider<SeriesProvider, Series, SeriesInfo>, IHasItemChangeMonitor
 {
