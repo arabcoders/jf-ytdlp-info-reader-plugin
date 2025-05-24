@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace YTINFOReader;
+namespace YTINFOReader.Provider;
 
 public abstract class AbstractProvider<B, T, E> : IRemoteMetadataProvider<T, E>, IHasItemChangeMonitor
     where T : BaseItem, IHasLookupInfo<E>

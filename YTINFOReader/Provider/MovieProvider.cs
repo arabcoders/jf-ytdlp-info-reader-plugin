@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using MediaBrowser.Controller.Entities.Movies;
 using YTINFOReader.Helpers;
 
-namespace YTINFOReader;
+namespace YTINFOReader.Provider;
 
 public class MovieProvider : AbstractProvider<MovieProvider, Movie, MovieInfo>
 {

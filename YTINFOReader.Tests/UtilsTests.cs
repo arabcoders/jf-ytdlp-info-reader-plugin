@@ -1,6 +1,5 @@
 ﻿using Xunit;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Model.Entities;
 using MediaBrowser.Controller;
 using Moq;
 using System.Collections.Generic;

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using YTINFOReader.Helpers;
 using MediaBrowser.Model.IO;
 
-namespace YTINFOReader;
+namespace YTINFOReader.Provider;
 
 public class SeasonProvider : AbstractProvider<SeasonProvider, Season, SeasonInfo>
 {

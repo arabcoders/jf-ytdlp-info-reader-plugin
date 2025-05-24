@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using MediaBrowser.Controller.Entities.TV;
 using YTINFOReader.Helpers;
 
-namespace YTINFOReader;
+namespace YTINFOReader.Provider;
 
 public class EpisodeProvider : AbstractProvider<EpisodeProvider, Episode, EpisodeInfo>
 {

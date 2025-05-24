@@ -13,7 +13,7 @@ using System.Threading;
 using System.Net.Http;
 using System.IO;
 
-namespace YTINFOReader;
+namespace YTINFOReader.Provider;
 
 public class ImageProvider : IRemoteImageProvider
 {
