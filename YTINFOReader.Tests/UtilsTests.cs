@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller;
 using Moq;
@@ -99,6 +99,8 @@ public class UtilsTest
         Assert.Equal("Rick Astley", result.People[0].Name);
         Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.People[0].ProviderIds[Constants.PLUGIN_NAME]);
         Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
+        Assert.Equal(["Music"], result.Item.Genres);
+        Assert.Equal(["tag1", "tag2", "tag3"], result.Item.Tags);
     }
 
     [Fact]
@@ -114,6 +116,8 @@ public class UtilsTest
         Assert.Equal("Rick Astley Tester", result.Item.Artists[0]);
         Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.People[0].ProviderIds[Constants.PLUGIN_NAME]);
         Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
+        Assert.Equal(["Music"], result.Item.Genres);
+        Assert.Equal(["tag1", "tag2", "tag3"], result.Item.Tags);
     }
 
     [Fact]
@@ -131,6 +135,8 @@ public class UtilsTest
         Assert.Equal(110259948, result.Item.IndexNumber);
         Assert.Equal(2009, result.Item.ParentIndexNumber);
         Assert.Equal("dQw4w9WgXcQ", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
+        Assert.Equal(["Music"], result.Item.Genres);
+        Assert.Equal(["tag1", "tag2", "tag3"], result.Item.Tags);
     }
 
     [Fact]
@@ -142,6 +148,8 @@ public class UtilsTest
         Assert.Equal("Rick Astley", result.Item.Name);
         Assert.Equal("Official YouTube channel for Rick Astley.", result.Item.Overview);
         Assert.Equal("UCuAXFkgsw1L7xaCfnd5JJOw", result.Item.ProviderIds[Constants.PLUGIN_NAME]);
+        Assert.Equal(["Music"], result.Item.Genres);
+        Assert.Equal(["tag1", "tag2", "tag3"], result.Item.Tags);
     }
 
     [Fact]
@@ -173,7 +181,7 @@ public class UtilsTest
 
     public static YTDLData GetYouTubeVideoData()
     {
-        string jsonString = "{\"id\":\"dQw4w9WgXcQ\",\"uploader\":\"Rick Astley\",\"upload_date\":\"20091025\",\"title\":\"Never Gonna Give You Up\",\"description\":\"The official video for “Never Gonna Give You Up” by Rick Astley\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":\"Music\",\"artist\":\"Rick Astley Tester\",\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null}";
+        string jsonString = "{\"id\":\"dQw4w9WgXcQ\",\"uploader\":\"Rick Astley\",\"upload_date\":\"20091025\",\"title\":\"Never Gonna Give You Up\",\"description\":\"The official video for “Never Gonna Give You Up” by Rick Astley\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":\"Music\",\"artist\":\"Rick Astley Tester\",\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null,\"categories\":[\"Music\"],\"tags\":[\"tag1\",\"tag2\",\"tag3\"]}";
         var data = JsonSerializer.Deserialize<YTDLData>(jsonString, Utils.JSON_OPTS) ?? new YTDLData();
         data.Path = "20091025 Never Gonna Give You Up [youtube-dQw4w9WgXcQ].mkv";
         return data;
@@ -187,7 +195,7 @@ public class UtilsTest
 
     public static YTDLData GetYouTubeChannelData()
     {
-        string jsonString = "{\"id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"uploader\":\"Rick Astley\",\"upload_date\":null,\"title\":\"Rick Astley\",\"description\":\"Official YouTube channel for Rick Astley.\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":null,\"artist\":null,\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null}";
+        string jsonString = "{\"id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"uploader\":\"Rick Astley\",\"upload_date\":null,\"title\":\"Rick Astley\",\"description\":\"Official YouTube channel for Rick Astley.\",\"channel_id\":\"UCuAXFkgsw1L7xaCfnd5JJOw\",\"track\":null,\"artist\":null,\"album\":null,\"epoch\":1673637911,\"file_path\":null,\"thumbnails\":null,\"categories\":[\"Music\"],\"tags\":[\"tag1\",\"tag2\",\"tag3\"]}";
         return JsonSerializer.Deserialize<YTDLData>(jsonString, Utils.JSON_OPTS) ?? new YTDLData();
     }
 
