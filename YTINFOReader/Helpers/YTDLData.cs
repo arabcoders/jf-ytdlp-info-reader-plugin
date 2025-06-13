@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace YTINFOReader.Helpers;
@@ -19,6 +19,8 @@ public class YTDLData
     public string Track { get; set; }
     public string Artist { get; set; }
     public string Album { get; set; }
+    public string[] Categories { get; set; }
+    public string[] Tags { get; set; }
 #nullable enable
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long? Epoch { get; set; }

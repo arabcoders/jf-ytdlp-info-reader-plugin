@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Controller;
+using MediaBrowser.Controller;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
@@ -187,6 +187,22 @@ public class Utils
         result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
         result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
 
+        if(json.Categories != null)
+        {
+            foreach(string category in json.Categories)
+            {
+                result.Item.AddGenre(category);
+            }
+        }
+
+        if(json.Tags != null)
+        {
+            foreach(string tag in json.Tags)
+            {
+                result.Item.AddTag(tag);
+            }
+        }
+
         return result;
     }
 
@@ -228,6 +244,22 @@ public class Utils
         result.Item.PremiereDate = date;
         result.AddPerson(CreatePerson(json.Uploader.Trim(), json.Channel_id));
         result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, json.Id);
+
+        if(json.Categories != null)
+        {
+            foreach(string category in json.Categories)
+            {
+                result.Item.AddGenre(category);
+            }
+        }
+
+        if(json.Tags != null)
+        {
+            foreach(string tag in json.Tags)
+            {
+                result.Item.AddTag(tag);
+            }
+        }
 
         return result;
     }
@@ -305,6 +337,22 @@ public class Utils
 
         Logger?.LogInformation($"{name} Matched '{json.Id}' - '{json.Title}' to 'S{result.Item.ParentIndexNumber}E{result.Item.IndexNumber}'.");
 
+        if(json.Categories != null)
+        {
+            foreach(string category in json.Categories)
+            {
+                result.Item.AddGenre(category);
+            }
+        }
+
+        if(json.Tags != null)
+        {
+            foreach(string tag in json.Tags)
+            {
+                result.Item.AddTag(tag);
+            }
+        }
+
         return result;
     }
 
@@ -344,6 +392,23 @@ public class Utils
         }
 
         result.Item.ProviderIds.Add(Constants.PLUGIN_NAME, identifier);
+
+        if(json.Categories != null)
+        {
+            foreach(string category in json.Categories)
+            {
+                result.Item.AddGenre(category);
+            }
+        }
+
+        if(json.Tags != null)
+        {
+            foreach(string tag in json.Tags)
+            {
+                result.Item.AddTag(tag);
+            }
+        }
+
         return result;
     }
 }
