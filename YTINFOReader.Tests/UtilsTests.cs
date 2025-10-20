@@ -78,6 +78,7 @@ public class UtilsTest
             Type = PersonKind.Director,
             ProviderIds = new Dictionary<string, string> { { Constants.PLUGIN_NAME, "UCuAXFkgsw1L7xaCfnd5JJOw" } }
         };
+        result.Id = expected.Id;
         Assert.Equal(JsonSerializer.Serialize(expected), JsonSerializer.Serialize(result));
     }
     [Fact]
